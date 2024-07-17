@@ -7,7 +7,7 @@
   <svg width=1000 height=1000></svg>
     <script>
       async function init() {
-      const data = await d3.csv("https://wc40.github.io/cs416-narrative-viz/data.csv");
+      const data = await d3.csv("https://wc40.github.io/cs416-narrative-viz/data1.csv");
 
       var xlogScale = d3.scaleLog([100,82000],[0,900]).base(10);
       var ylogScale = d3.scaleLog([100,250000],[900,0]).base(10);
