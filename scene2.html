@@ -18,7 +18,7 @@
       const data = await d3.csv("https://wc40.github.io/cs416-narrative-viz/data2.csv");
 
       var xTimeScale =  d3.scaleTime()
-        .domain(d3.extent(data, function(d) { return d.year; }))
+        .domain(d3.extent(data, function(d) { return d['year']; }))
         .range([ 0, 500 ]);
       var ylogScale = d3.scaleLog([100,250000],[500,0]).base(10);
 
@@ -31,8 +31,8 @@
         .attr("stroke", "steelblue")
         .attr("stroke-width", 1.5)
         .attr("d", d3.line()
-          .x(function(d) { return xTimeScale(d['year']) })
-          .y(function(d) { return ylogScale(d['energy_per_capita']) })
+          .x(function(d) { return xTimeScale(d['year']); })
+          .y(function(d) { return ylogScale(d['energy_per_capita']); })
           )
 
       d3.select('svg')
