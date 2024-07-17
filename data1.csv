@@ -1,4 +1,4 @@
-﻿country,year,iso_code,region,population,energy_per_capita,national income per capita (current US$),gdp per capita,gdp,biofuel_share_energy,coal_share_energy,fossil_share_energy,gas_share_energy,hydro_share_energy,nuclear_share_energy,oil_share_energy,other_renewables_share_energy,renewables_share_energy,solar_share_energy,wind_share_energy,Column1
+﻿country,year,iso_code,region,population,energy_per_capita,income_per_capita,gdp_per_capita,gdp,biofuel_share_energy,coal_share_energy,fossil_share_energy,gas_share_energy,hydro_share_energy,nuclear_share_energy,oil_share_energy,other_renewables_share_energy,renewables_share_energy,solar_share_energy,wind_share_energy,Column1
 Afghanistan,2020,AFG,Asia,38972236,702.888,476.8990597,1832.527868,71417708544,,,,,,,,,,,,
 Albania,2020,ALB,Europe,2866850,11158.003,4322.549675,11207.67598,32130725888,,,,,,,,,,,,
 Algeria,2020,DZA,Africa,43451668,14933.807,2726.422747,12883.74016,559820000000,,0.235,99.7,66.806,0.02,0,32.659,0,0.3,0.277,0.003,
