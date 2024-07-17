@@ -9,8 +9,8 @@
       async function init() {
       const data = await d3.csv("https://wc40.github.io/cs416-narrative-viz/data.csv");
 
-      var xlogScale = d3.scaleLog([100,250000],[0,900]).base(10);
-      var ylogScale = d3.scaleLog([100,82000],[900,0]).base(10);
+      var xlogScale = d3.scaleLog([100,82000],[0,900]).base(10);
+      var ylogScale = d3.scaleLog([100,250000],[900,0]).base(10);
 
       d3.select('svg')
         .append('g')
@@ -21,14 +21,14 @@
         .append('circle')
         .attr('cx', function(d) {return xlogScale(d['national_income_per_capita']);})
         .attr('cy', function(d) {return ylogScale(d['energy_per_capita']);})
-        .attr('r', function(d) {return (1+ +d['population'])/1424929792;} );
+        .attr('r', function(d) {return 2;} );
 
       d3.select('svg')
         .append('g')
         .attr('transform', 'translate(50,50)')
         .call(
           d3.axisLeft(ylogScale)
-          .tickValues([100,500,1000,10000,80000])
+          .tickValues([100,500,1000,10000,240000])
           .tickFormat(d3.format("~s"))
         );
 
@@ -37,7 +37,7 @@
         .attr('transform', 'translate(50,950)')
         .call(
         d3.axisBottom(xlogScale)
-        .tickValues([100,500,1000,10000,240000])
+        .tickValues([100,500,1000,10000,80000])
         .tickFormat(d3.format("~s"))
         );
       }
