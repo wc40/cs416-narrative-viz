@@ -1,5 +1,5 @@
 ﻿country,year,iso_code,region,population,energy_per_capita,income_per_capita,gdp_per_capita,gdp,biofuel_share_energy,coal_share_energy,fossil_share_energy,gas_share_energy,hydro_share_energy,nuclear_share_energy,oil_share_energy,other_renewables_share_energy,renewables_share_energy,solar_share_energy,wind_share_energy
-Afghanistan,2010,AFG,Asia,28189672,1182.892,506.922384,1681.446453,47399424000,,,,,,,,,,,
+Afghanistan,2010,AFG,Asia,28189672,1182.892,1000.922384,1681.446453,47399424000,,,,,,,,,,,
 Afghanistan,2011,AFG,Asia,29249156,1436.114,568.5774105,1823.175205,53326336000,,,,,,,,,,,
 Afghanistan,2012,AFG,Asia,30466484,1324.121,607.6121178,1942.032439,59166900224,,,,,,,,,,,
 Afghanistan,2013,AFG,Asia,31541216,1060.793,598.8995846,1997.186754,62993698816,,,,,,,,,,,
