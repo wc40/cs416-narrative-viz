@@ -1,59 +1,70 @@
 <!DOCTYPE html>
 <html>
-<script src='https://d3js.org/d3.v5.min.js'></script>
+<script src="https://d3js.org/d3.v6.js"></script>
 
-<style> 
-  circle {fill: lightblue; stroke: black;} 
-</style>
-
+<!-- Create a div where the graph will take place -->
 <head>
   <h1>Scene 2
   </h1>
 </head>
 
-<body onload='init()'>
-  <svg width=600 height=600></svg>
-    <script>
-      async function init() {
-      const data = await d3.csv("https://wc40.github.io/cs416-narrative-viz/data1.csv");
+<body>
+<svg width=600 height=600></svg>
+  <script>
 
-      var xlogScale = d3.scaleLog([100,82000],[0,500]).base(10);
-      var ylogScale = d3.scaleLog([100,250000],[500,0]).base(10);
+  // set the dimensions and margins of the graph
+  const margin = {top: 10, right: 50, bottom: 50, left: 50},
+      width = 600 - margin.left - margin.right,
+      height = 600 - margin.top - margin.bottom;
 
-      d3.select('svg')
-        .append('g')
-        .attr('transform', 'translate(50,50)')
-        .selectAll('circle')
-        .data(data)
-        .enter()
-        .append('circle')
-        .attr('cx', function(d) {return xlogScale(d['income_per_capita']);})
-        .attr('cy', function(d) {return ylogScale(d['energy_per_capita']);})
-        .attr('r', function(d) {return 3;} );
+  // append the svg object to the body of the page
+  const svg = d3.select("svg")
+    .append("g")
+      .attr("transform", `translate(${margin.left},${margin.top})`);
 
-      d3.select('svg')
-        .append('g')
-        .attr('transform', 'translate(50,50)')
-        .call(
-          d3.axisLeft(ylogScale)
-          .tickValues([100,500,1000,10000,240000])
-          .tickFormat(d3.format("~s"))
-        );
+  //Read the data
+  d3.csv("https://wc40.github.io/cs416-narrative-viz/data2.csv",
 
-      d3.select('svg')
-        .append('g')
-        .attr('transform', 'translate(50,550)')
-        .call(
-        d3.axisBottom(xlogScale)
-        .tickValues([100,500,1000,10000,80000])
-        .tickFormat(d3.format("~s"))
-        );
-      }
-    </script>
+    // When reading the csv, I must format variables:
+    function(d){
+      return {  year : d3.timeParse("%Y")(d.year), income_per_capita : d.income_per_capita }
+    }).then(
 
-    <form action="https://wc40.github.io/cs416-narrative-viz">
-      <input type="submit" value="Previous"/>
-    </form>
+    // Now I can use this dataset:
+    function(data) {
 
-  </body>
+      // Add X axis --> it is a date format
+      const x = d3.scaleTime()
+        .domain(d3.extent(data, function(d) { return d.year; }))
+        .range([ 0, width ]);
+      svg.append("g")
+        .attr("transform", `translate(0, ${height})`)
+        .call(d3.axisBottom(x));
+
+      // Add Y axis
+      const y = d3.scaleLinear()
+        .domain([0, d3.max(data, function(d) { return +d.income_per_capita; })])
+        .range([ height, 0 ]);
+      svg.append("g")
+        .call(d3.axisLeft(y));
+
+      // Add the line
+      svg.append("path")
+        .datum(data)
+        .attr("fill", "none")
+        .attr("stroke", "steelblue")
+        .attr("stroke-width", 1.5)
+        .attr("d", d3.line()
+          .x(function(d) { return x(d.year) })
+          .y(function(d) { return y(d.income_per_capita) })
+          )
+
+  })
+  </script>
+
+  <form action="https://wc40.github.io/cs416-narrative-viz">
+    <input type="submit" value="Previous"/>
+  </form>
+
+</body>
 </html>
