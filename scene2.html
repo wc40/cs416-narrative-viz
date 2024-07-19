@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html>
 
-<!-- Load d3.js -->
 <script src="https://d3js.org/d3.v6.js"></script>
 
 <style>
@@ -27,92 +26,128 @@
       width = 600 - margin.left - margin.right,
       height = 600 - margin.top - margin.bottom;
 
-// append the svg object to the body of the page
 const svg = d3.select("svg")
   .append("g")
     .attr("transform", `translate(${margin.left},${margin.top})`);
 
-//Read the data
-d3.csv("https://wc40.github.io/cs416-narrative-viz/data-test.csv").then( function(data) {
+//create a promise for reading the data
+Promise.all([
+    d3.csv("https://wc40.github.io/cs416-narrative-viz/data2-income.csv"),
+    d3.csv("https://wc40.github.io/cs416-narrative-viz/data2-energy.csv"),
+]).then(function(files){
     
-    // List of groups (here I have one group per column)
-    const allGroup = ["Afghanistan","Albania","Algeria","American Samoa","Andorra","Angola","Antigua and Barbuda","Argentina","Armenia","Aruba","Australia","Austria","Azerbaijan","Bahamas, The","Bahrain","Bangladesh","Barbados","Belarus","Belgium","Belize","Benin","Bermuda","Bhutan","Bolivia","Bosnia and Herzegovina","Botswana","Brazil","British Virgin Islands","Brunei Darussalam","Bulgaria","Burkina Faso","Burundi","Cabo Verde","Cambodia","Cameroon","Canada","Cayman Islands","Central African Republic","Chad","Channel Islands","Chile","China","Colombia","Comoros","Congo, Dem. Rep.","Congo, Rep.","Costa Rica","Cote d'Ivoire","Croatia","Cuba","Curacao","Cyprus","Czechia","Denmark","Djibouti","Dominica","Dominican Republic","Ecuador","Egypt, Arab Rep.","El Salvador","Equatorial Guinea","Eritrea","Estonia","Eswatini","Ethiopia","Faroe Islands","Fiji","Finland","France","French Polynesia","Gabon","Gambia, The","Georgia","Germany","Ghana","Gibraltar","Greece","Greenland","Grenada","Guam","Guatemala","Guinea","Guinea-Bissau","Guyana","Haiti","Honduras","Hong Kong SAR, China","Hungary","Iceland","India","Indonesia","Iran, Islamic Rep.","Iraq","Ireland","Isle of Man","Israel","Italy","Jamaica","Japan","Jordan","Kazakhstan","Kenya","Kiribati","Korea, Dem. People's Rep.","Korea, Rep.","Kosovo","Kuwait","Kyrgyz Republic","Lao PDR","Latvia","Lebanon","Lesotho","Liberia","Libya","Liechtenstein","Lithuania","Luxembourg","Macao SAR, China","Madagascar","Malawi","Malaysia","Maldives","Mali","Malta","Marshall Islands","Mauritania","Mauritius","Mexico","Micronesia, Fed. Sts.","Moldova","Monaco","Mongolia","Montenegro","Morocco","Mozambique","Myanmar","Namibia","Nauru","Nepal","Netherlands","New Caledonia","New Zealand","Nicaragua","Niger","Nigeria","North Macedonia","Northern Mariana Islands","Norway","Oman","Pakistan","Palau","Panama","Papua New Guinea","Paraguay","Peru","Philippines","Poland","Portugal","Puerto Rico","Qatar","Romania","Russian Federation","Rwanda","Samoa","San Marino","Sao Tome and Principe","Saudi Arabia","Senegal","Serbia","Seychelles","Sierra Leone","Singapore","Sint Maarten (Dutch part)","Slovak Republic","Slovenia","Solomon Islands","Somalia","South Africa","South Sudan","Spain","Sri Lanka","St. Kitts and Nevis","St. Lucia","St. Martin (French part)","St. Vincent and the Grenadines","Sudan","Suriname","Sweden","Switzerland","Syrian Arab Republic","Tajikistan","Tanzania","Thailand","Timor-Leste","Togo","Tonga","Trinidad and Tobago","Tunisia","Turkiye","Turkmenistan","Turks and Caicos Islands","Tuvalu","Uganda","Ukraine","United Arab Emirates","United Kingdom","United States","Uruguay","Uzbekistan","Vanuatu","Venezuela, RB","Viet Nam","Virgin Islands (U.S.)","West Bank and Gaza","Yemen, Rep.","Zambia","Zimbabwe"]
+    const income_data = files[0]
+    const energy_data = files[1]
 
-    // add the options to the button
+    //options for button
+    const country_options = ["Afghanistan","Albania","Algeria","American Samoa","Angola","Antigua and Barbuda","Argentina","Armenia","Aruba","Australia","Austria","Azerbaijan","Bahamas","Bahrain","Bangladesh","Barbados","Belarus","Belgium","Belize","Benin","Bermuda","Bhutan","Bolivia","Bosnia and Herzegovina","Botswana","Brazil","British Virgin Islands","Brunei","Bulgaria","Burkina Faso","Burundi","Cambodia","Cameroon","Cape Verde","Canada","Cayman Islands","Central African Republic","Chad","Chile","China","Colombia","Comoros","Congo","Cook Islands","Costa Rica","Democratic Republic of Congo","Cote d'Ivoire","Croatia","Cuba","Cyprus","Czechia","Denmark","Djibouti","Dominica","Dominican Republic","East Timor","Ecuador","Egypt","El Salvador","Equatorial Guinea","Eritrea","Estonia","Eswatini","Ethiopia","Falkland Islands","Faroe Islands","Fiji","Finland","France","French Polynesia","French Guiana","Gabon","Gambia","Georgia","Germany","Ghana","Gibraltar","Greece","Greenland","Grenada","Guam","Guatemala","Guadeloupe","Guinea","Guinea-Bissau","Guyana","Haiti","Honduras","Hong Kong","Hungary","Iceland","India","Indonesia","Iran","Iraq","Ireland","Israel","Italy","Jamaica","Japan","Jordan","Kazakhstan","Kenya","Kiribati","North Korea","South Korea","Kuwait","Kyrgyzstan","Laos","Latvia","Lebanon","Lesotho","Liberia","Libya","Lithuania","Luxembourg","Macao","Madagascar","Malawi","Malaysia","Maldives","Mali","Malta","Martinique","Mauritania","Mauritius","Mexico","Micronesia (country)","Moldova","Mongolia","Montenegro","Montserrat","Morocco","Mozambique","Myanmar","Namibia","Nauru","Nepal","Netherlands","New Caledonia","New Zealand","Nicaragua","Niger","Nigeria","Niue","North Macedonia","Northern Mariana Islands","Norway","Oman","Pakistan","Palestine","Panama","Papua New Guinea","Paraguay","Peru","Philippines","Poland","Portugal","Puerto Rico","Qatar","Reunion","Romania","Russia","Rwanda","Samoa","Saint Helena","Saint Kitts and Nevis","Sao Tome and Principe","Saint Lucia","Saudi Arabia","Saint Pierre and Miquelon","Senegal","Saint Vincent and the Grenadines","Serbia","Seychelles","Sierra Leone","Singapore","Slovakia","Slovenia","Solomon Islands","Somalia","South Africa","South Sudan","Spain","Sri Lanka","Sudan","Suriname","Sweden","Switzerland","Syria","Tajikistan","Taiwan","Tanzania","Thailand","Togo","Tonga","Trinidad and Tobago","Tunisia","Turkey","Turkmenistan","Turks and Caicos Islands","Tuvalu","Uganda","Ukraine","United Arab Emirates","United Kingdom","United States","Uruguay","United States Virgin Islands","Uzbekistan","Vanuatu","Venezuela","Vietnam","Western Sahara","Yemen","Zambia","Zimbabwe"]
+
+    //insert options to button
     d3.select("#selectButton")
       .selectAll('myOptions')
-     	.data(allGroup)
+     	.data(country_options)
       .enter()
     	.append('option')
       .text(function (d) { return d; }) // text showed in the menu
       .attr("value", function (d) { return d; }) // corresponding value returned by the button
 
-    // A color scale: one color for each group
-    const myColor = d3.scaleOrdinal()
-      .domain(allGroup)
+    // FIX THIS:  REMOVE AND JUST COLOR EACH LINE CONSISTENTLY (INCOME GREEN, ENERGY RED?)
+    const color_income = d3.scaleOrdinal()
+      .domain(country_options)
       .range(d3.schemeSet2);
     
-    //create time parser
-    
+    const color_energy = d3.scaleOrdinal()
+      .domain(country_options)
+      .range(d3.schemeSet3);
+  
+    // x-axis
     const x = d3.scaleTime()
-        .domain(d3.extent(data, function (d) { return d3.timeParse("%Y")(d.year); }))
+        .domain(d3.extent(income_data, function (d) { return d3.timeParse("%Y")(d.year); }))
         .range([ 0, width ]);
       svg.append("g")
         .attr("transform", `translate(0, ${height})`)
         .call(d3.axisBottom(x));
         
-      const y = d3.scaleLog()
-      	.domain([100,85000])
-      	.range([height,0])
-        .base(10)
-      svg.append("g")
-        .call(
-        	d3.axisLeft(y)
-            .tickValues([100,500,1000,3000,10000,30000,80000])
-        	.tickFormat(d3.format("~s"))
-            );
+    // y-axis
+    const y = d3.scaleLog()
+      .domain([100,85000])
+      .range([height,0])
+      .base(10)
+    svg.append("g")
+      .call(
+        d3.axisLeft(y)
+          .tickValues([100,500,1000,3000,10000,30000,80000])
+        .tickFormat(d3.format("~s"))
+          );
 
-    // Initialize line with group a
-    const line = svg
+    //write income line for first option
+    const line_income = svg
       .append('g')
       .append("path")
-        .datum(data)
+        .datum(income_data)
         .attr("d", d3.line()
           .x(function(d) { return x(d3.timeParse("%Y")(d.year)) })
           .y(function(d) { return y(+d.Afghanistan) })
         )
-        .attr("stroke", function(d){ return myColor("Afghanistan") })
+        .attr("stroke", function(d){ return color_income("Afghanistan") })
         .style("stroke-width", 4)
         .style("fill", "none")
 
-    // A function that update the chart
-    function update(selectedGroup) {
-
-      // Create new data with the selection?
-      const dataFilter = data.map(function(d){return {year: d.year, value:d[selectedGroup]} })
-
-      // Give these new data to update line
-      line
-          .datum(dataFilter)
-          .transition()
-          .duration(1000)
+      //write energy line for first option
+      const line_energy = svg
+        .append('g')
+        .append("path")
+          .datum(energy_data)
           .attr("d", d3.line()
             .x(function(d) { return x(d3.timeParse("%Y")(d.year)) })
-            .y(function(d) { return y(+d.value) })
+            .y(function(d) { return y(+d.Afghanistan) })
           )
-          .attr("stroke", function(d){ return myColor(selectedGroup) })
-    }
+          .attr("stroke", function(d){ return color_energy("Afghanistan") })
+          .style("stroke-width", 4)
+          .style("fill", "none")
 
+    // update chart with new selection
+    function updateChart(selectedGroup) {
+
+      // filter each data type based on selection
+      const dataFilter_income = income_data.map(function(d){return {year: d.year, value:d[selectedGroup]} })
+      const dataFilter_energy = energy_data.map(function(d){return {year: d.year, value:d[selectedGroup]} })
+
+      // update income line
+      line_income
+        .datum(dataFilter_income)
+        .transition()
+        .duration(1000)
+        .attr("d", d3.line()
+          .x(function(d) { return x(d3.timeParse("%Y")(d.year)) })
+          .y(function(d) { return y(+d.value) })
+        )
+        .attr("stroke", function(d){ return color_income(selectedGroup) })
+
+      // update energy line
+      line_energy
+        .datum(dataFilter_energy)
+        .transition()
+        .duration(1000)
+        .attr("d", d3.line()
+          .x(function(d) { return x(d3.timeParse("%Y")(d.year)) })
+          .y(function(d) { return y(+d.value) })
+        )
+        .attr("stroke", function(d){ return color_energy(selectedGroup) })
+    }
+    
+    // drop-down menu listener
     d3.select("#selectButton").on("change", function(event,d) {
         // recover the option that has been chosen
         const selectedOption = d3.select(this).property("value")
         // run the updateChart function with this selected option
-        update(selectedOption)
+        updateChart(selectedOption)
     })
-    console.log(data)
 })
 </script>
 
+
+<!-- FIX THIS: change this button to a better version? -->
 <form action="https://wc40.github.io/cs416-narrative-viz">
   <input type="submit" value="Previous"/>
 </form>
