@@ -51,14 +51,6 @@ Promise.all([
       .text(function (d) { return d; }) // text showed in the menu
       .attr("value", function (d) { return d; }) // corresponding value returned by the button
 
-    // FIX THIS:  REMOVE AND JUST COLOR EACH LINE CONSISTENTLY (INCOME GREEN, ENERGY RED?)
-    const color_income = d3.scaleOrdinal()
-      .domain(country_options)
-      .range(d3.schemeSet2);
-    
-    const color_energy = d3.scaleOrdinal()
-      .domain(country_options)
-      .range(d3.schemeSet3);
   
     // x-axis
     const x = d3.scaleTime()
@@ -70,13 +62,13 @@ Promise.all([
         
     // y-axis
     const y = d3.scaleLog()
-      .domain([100,85000])
+      .domain([100,200000])
       .range([height,0])
       .base(10)
     svg.append("g")
       .call(
         d3.axisLeft(y)
-          .tickValues([100,500,1000,3000,10000,30000,80000])
+          .tickValues([100,300,1000,3000,10000,30000,100000,200000])
         .tickFormat(d3.format("~s"))
           );
 
@@ -89,7 +81,7 @@ Promise.all([
           .x(function(d) { return x(d3.timeParse("%Y")(d.year)) })
           .y(function(d) { return y(+d.Afghanistan) })
         )
-        .attr("stroke", function(d){ return color_income("Afghanistan") })
+        .attr("stroke", 'green')
         .style("stroke-width", 4)
         .style("fill", "none")
 
@@ -102,7 +94,7 @@ Promise.all([
             .x(function(d) { return x(d3.timeParse("%Y")(d.year)) })
             .y(function(d) { return y(+d.Afghanistan) })
           )
-          .attr("stroke", function(d){ return color_energy("Afghanistan") })
+          .attr("stroke", 'red')
           .style("stroke-width", 4)
           .style("fill", "none")
 
@@ -122,7 +114,7 @@ Promise.all([
           .x(function(d) { return x(d3.timeParse("%Y")(d.year)) })
           .y(function(d) { return y(+d.value) })
         )
-        .attr("stroke", function(d){ return color_income(selectedGroup) })
+        .attr("stroke", 'green')
 
       // update energy line
       line_energy
@@ -133,15 +125,15 @@ Promise.all([
           .x(function(d) { return x(d3.timeParse("%Y")(d.year)) })
           .y(function(d) { return y(+d.value) })
         )
-        .attr("stroke", function(d){ return color_energy(selectedGroup) })
+        .attr("stroke", 'red')
     }
     
     // drop-down menu listener
     d3.select("#selectButton").on("change", function(event,d) {
-        // recover the option that has been chosen
-        const selectedOption = d3.select(this).property("value")
-        // run the updateChart function with this selected option
-        updateChart(selectedOption)
+      // recover the option that has been chosen
+      const selectedOption = d3.select(this).property("value")
+      // run the updateChart function with this selected option
+      updateChart(selectedOption)
     })
 })
 </script>
@@ -150,6 +142,9 @@ Promise.all([
 <!-- FIX THIS: change this button to a better version? -->
 <form action="https://wc40.github.io/cs416-narrative-viz">
   <input type="submit" value="Previous"/>
+</form>
+<form action="https://wc40.github.io/cs416-narrative-viz/scene3.html">
+  <input type="submit" value="Start Over"/>
 </form>
 
 </body>
