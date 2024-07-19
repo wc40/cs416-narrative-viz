@@ -1,9 +1,6 @@
 <!DOCTYPE html>
 <html>
 <script src='https://d3js.org/d3.v5.min.js'></script>
-<style> 
-  circle {fill: lightblue; stroke: black;} 
-</style>
 
 <head>
   <h1>Scene 1
@@ -16,8 +13,13 @@
       async function init() {
       const data = await d3.csv("https://wc40.github.io/cs416-narrative-viz/data1.csv");
 
-      var xlogScale = d3.scaleLog([100,82000],[0,500]).base(10);
-      var ylogScale = d3.scaleLog([100,250000],[500,0]).base(10);
+      const xlogScale = d3.scaleLog([100,82000],[0,500]).base(10);
+      const ylogScale = d3.scaleLog([100,250000],[500,0]).base(10); 
+      const sizeScale = d3.scaleLog([100000,1424929792],[0,10]).base(10);
+
+      const color = d3.scaleOrdinal()
+      .domain(['Americas','Europe','Africa','Asia','Oceania'])
+      .range(d3.schemeSet2);
 
       d3.select('svg')
         .append('g')
@@ -28,7 +30,9 @@
         .append('circle')
         .attr('cx', function(d) {return xlogScale(d['income_per_capita']);})
         .attr('cy', function(d) {return ylogScale(d['energy_per_capita']);})
-        .attr('r', function(d) {return 3;} );
+        .attr('r', function(d) {return 1 + sizeScale(d['population']) ;})
+        .attr('fill',function(d){return color(d.region)})
+        .attr('stroke','black');
 
       d3.select('svg')
         .append('g')
