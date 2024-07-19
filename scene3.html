@@ -46,7 +46,10 @@ d3.csv("https://wc40.github.io/cs416-narrative-viz/data-energy-source.csv").then
       .attr("value", function (d) { return d; }) 
 
     // FIX THIS:  CREATE COLORING FOR DIFFERENT ENERGY SOURCES
-    
+    const color = d3.scaleOrdinal()
+      .domain(['Biofuel','Coal','Gas','Hydro','Nuclear','Oil','Other Renewables','Solar','Wind'])
+      .range(d3.schemeSet2);
+
     // x-axis declaration and plot
     var x = d3.scaleBand()
       .range([ 0, width ])
@@ -75,7 +78,7 @@ d3.csv("https://wc40.github.io/cs416-narrative-viz/data-energy-source.csv").then
         .attr("y", function(d) { return y(+d.Argentina); })
         .attr("width", x.bandwidth())
         .attr("height", function(d) { return height - y(+d.Argentina); })
-        .attr("fill", "#69b3a2")
+        .attr("fill", function(d){ return color(d.energy_source)})
 
     // update chart with new country selection
     function updateChart(selectedGroup) {
