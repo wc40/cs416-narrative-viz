@@ -1,64 +1,188 @@
 <!DOCTYPE html>
 <html>
-<script src='https://d3js.org/d3.v5.min.js'></script>
-
+<script src='https://d3js.org/d3.v6.min.js'></script>
+<script src="https://rawgit.com/susielu/d3-annotation/master/d3-annotation.min.js"></script>
 <head>
   <h1>Scene 1
   </h1>
 </head>
 
-<body onload='init()'>
-  <svg width=600 height=600></svg>
+<div id="scatterPlot">  </div>
+  <button onclick="nextScene(current_scene);">Next</button>
+    
     <script>
-      async function init() {
-      const data = await d3.csv("https://wc40.github.io/cs416-narrative-viz/data1.csv");
+      const marginScatter = {top: 50, right: 50, bottom: 50, left: 50},
+        widthScatter = 600 - marginScatter.left - marginScatter.right,
+        heightScatter = 600 - marginScatter.top - marginScatter.bottom;
 
-      const xlogScale = d3.scaleLog([100,82000],[0,500]).base(10);
-      const ylogScale = d3.scaleLog([100,250000],[500,0]).base(10); 
-      const sizeScale = d3.scaleLog([100000,1424929792],[0,10]).base(10);
+      const svg = d3.select("#scatterPlot")
+        .append("svg")
+          .attr("width", "1000")
+          .attr("height", heightScatter + marginScatter.top + marginScatter.bottom)
+        .append("g")
+          .attr("transform", `translate(${marginScatter.left},${marginScatter.top})`);
+          
+      var y_value_1 = 'population', y_value_2 = 'gdp', y_value_3 = 'total_energy';
+      var y_ticks_1 = [100000,300000,1000000,3000000,10000000,30000000,10000000,30000000,100000000,300000000,1000000000],
+          y_ticks_2 = [1000000000,3000000000,10000000000,30000000000,100000000000,300000000000,1000000000000,3000000000000,10000000000000,30000000000000],
+          y_ticks_3 = [1000000000,3000000000,10000000000,30000000000,100000000000,300000000000,1000000000000,3000000000000,10000000000000,30000000000000];
 
+      var current_scene = 1;
+      var current_y_value = y_value_1;
+      var current_y_ticks = y_ticks_1;
+      
+      const nodeSize = d3.scaleLinear([0,100],[1,18]);
       const color = d3.scaleOrdinal()
       .domain(['Americas','Europe','Africa','Asia','Oceania'])
       .range(d3.schemeSet2);
+      const yAxis = svg.append('g').attr('class','myYaxis');
+      
+      
 
-      d3.select('svg')
-        .append('g')
-        .attr('transform', 'translate(50,50)')
-        .selectAll('circle')
-        .data(data)
-        .enter()
-        .append('circle')
-        .attr('cx', function(d) {return xlogScale(d['income_per_capita']);})
-        .attr('cy', function(d) {return ylogScale(d['energy_per_capita']);})
-        .attr('r', function(d) {return 1 + sizeScale(d['population']) ;})
-        .attr('fill',function(d){return color(d.region)})
-        .attr('stroke','black');
+      function updateChart(yAxisValue,yTickValues){
+        d3.csv("https://wc40.github.io/cs416-narrative-viz/data1.csv").then(function(data) {
+        
+      const xAxis = d3.scaleLog(d3.extent(data,function(d){return +d['energy_per_capita']}),[0,widthScatter]).base(10);
+      const y = d3.scaleLog().range([heightScatter,0]).base(10);
+      
+      const tooltip = d3.select("#scatterPlot")
+        .append("div")
+        .style("opacity", 0)
+        .attr("class", "tooltip")
+        .style("color","white")
+        .style("background-color", "black")
+        .style("border", "solid")
+        .style("border-width", "1px")
+        .style("border-radius", "4px")
+        .style("padding", "5px")
+        .style("position",'absolute')
+    
+      // Three function that change the tooltip when user hover / move / leave a cell
+      const mouseover = function(event,d) {
+        tooltip.transition().duration(300).style("opacity", 0.7)
+      }
+      const mousemove = function(event,d) {
+        tooltip
+          .html("Country: \xa0" + d['country'] + '<br>Green Energy:  ' + d['green_energy_share'] + '%')
+          .style("left", (event.x) + "px")
+          .style("top", (event.y) + "px")
+      }
+      const mouseleave = function(d) {
+        tooltip.transition().duration(300).style("opacity", 0)
+      }
 
-      d3.select('svg')
-        .append('g')
-        .attr('transform', 'translate(50,50)')
+      svg.append('g')
+        .attr("transform", `translate(0, ${heightScatter})`)
+        .transition().duration(1000)
         .call(
-          d3.axisLeft(ylogScale)
-          .tickValues([100,500,1000,10000,240000])
-          .tickFormat(d3.format("~s"))
-        );
-
-      d3.select('svg')
-        .append('g')
-        .attr('transform', 'translate(50,550)')
-        .call(
-        d3.axisBottom(xlogScale)
-        .tickValues([100,500,1000,10000,80000])
+        d3.axisBottom(xAxis)
+        .tickValues([100,300,1000,3000,10000,30000,100000,200000])
         .tickFormat(d3.format("~s"))
         );
-      }
-    </script>
+        
+        y.domain(d3.extent(data,function(d){return +d[yAxisValue]}),);
 
-    <form action="scene2.html">
-      <input type="submit" value="Next"/>
-    </form>
+        yAxis
+        .transition().duration(1000)
+        .call(
+          d3.axisLeft(y)
+          .tickValues(yTickValues)
+          .tickFormat(d3.format("~s")));
+
+        svg
+        .selectAll('circle')
+        .data(data)
+        .join('circle').transition().duration(1000)
+        .attr('cx', function(d) {return xAxis(+d['energy_per_capita']);})
+        .attr('cy', function(d) {return y(+d[yAxisValue]);})
+        .attr('r', function(d) {return 3 + (nodeSize(+d['green_energy_share']) );})
+        .attr('fill',function(d){return color(d.region)})
+        .attr('stroke','black')
+        
+        svg
+        .selectAll('circle')
+        .on("mouseover", mouseover)
+        .on("mousemove", mousemove)
+        .on("mouseleave", mouseleave);
+        
+        
     
-  </body>
+      const annotation1 = [
+      {
+        note: {
+          label: "Population: 335942016",
+          title: "United States"
+        },
+        x: xAxis(73294.336),
+        y: y(335942016),
+        dy: 100,
+        dx: 100
+      }
+    ]
+      const annotation2 = [
+      {
+        note: {
+          label: "GDP: 18027400000000",
+          title: "United States"
+        },
+        x: xAxis(73294.336),
+        y: y(18027400000000),
+        dy: 100,
+        dx: 100
+      }
+    ]
+    if (current_scene==1){
+      annotations = annotation1;
+    }
+    else if (current_scene == 2){
+      svg.select(".annotations").remove()
+      annotations = annotation2;
+    }
+      // Add annotation to the chart
+      const makeAnnotations = d3.annotation()
+        .annotations(annotations);
+        svg.append('g')
+        .call(makeAnnotations)
+        
+        /*svg.selectAll('line').remove();
+        
+        var us = svg.selectAll("us")
+          .data(data.filter(function(d){return d.country == 'United States'}))
+          .enter()
+          .append('g')
+          
+        us.append('line')
+        .attr('x1',function(d) {return xAxis(+d['energy_per_capita']);})
+        .attr('x2', 600)
+        .attr('y1', function(d) {return y(+d[yAxisValue]);})
+        .attr('y2', 100)
+        .attr('stroke','black')
+        .attr('stroke-width',0.5)*/
+      })
+      }
+      
+      
+      function nextScene(curScene){
+        if (curScene == 1 ) {
+          current_scene = 2;
+          current_y_value = y_value_2;
+          current_y_ticks = y_ticks_2;
+          updateChart(current_y_value,current_y_ticks);
+        }
+        else if (curScene == 2 ) {
+          //change current_y_value and tick values
+          //update chart
+          current_scene = 3
+          current_y_value = y_value_3;
+          current_y_ticks = y_ticks_3;
+          updateChart(current_y_value,current_y_ticks);
+        }
+        else if (curScene == 3) {
+          window.location.href = "https://wc40.github.io/cs416-narrative-viz/exploration.html";
+        }
+      }
+      
+      updateChart(current_y_value,current_y_ticks);
+      
+    </script>
 </html>
-
-
