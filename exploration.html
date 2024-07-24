@@ -16,15 +16,15 @@
 </head>
 
 <div id="scatterPlot">  </div>
-<button onclick="nextScene(current_scene);">Next</button>
+
   <script>
     const marginScatter = {top: 50, right: 50, bottom: 50, left: 50},
-      widthScatter = 1200 - marginScatter.left - marginScatter.right,
+      widthScatter = 900 - marginScatter.left - marginScatter.right,
       heightScatter = 600 - marginScatter.top - marginScatter.bottom;
 
     const svg = d3.select("#scatterPlot")
       .append("svg")
-        .attr("width", "1200")
+        .attr("width", "1000")
         .attr("height", heightScatter + marginScatter.top + marginScatter.bottom)
       .append("g")
         .attr("transform", `translate(${marginScatter.left},${marginScatter.top})`);
@@ -35,8 +35,8 @@
         y_ticks_3 = [1000000000,3000000000,10000000000,30000000000,100000000000,300000000000,1000000000000,3000000000000,10000000000000,30000000000000];
 
     var current_scene = 1;
-    var current_y_value = y_value_1;
-    var current_y_ticks = y_ticks_1;
+    var current_y_value = 'income_per_capita';
+    var current_y_ticks = [200,300,1000,3000,10000,30000,100000];
     
     const nodeSize = d3.scaleLinear([0,100],[1,18]);
     const color = d3.scaleOrdinal()
@@ -382,7 +382,7 @@ Promise.all([
 
 <!-- FIX THIS: change this button to a better version? -->
 <form action="https://wc40.github.io/cs416-narrative-viz">
-  <input type="submit" value="Previous"/>
+  <input type="submit" value="Start Over"/>
 </form>
 
 </html>
