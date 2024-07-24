@@ -18,13 +18,13 @@
 <div id="scatterPlot">  </div>
 
   <script>
-    const marginScatter = {top: 50, right: 50, bottom: 50, left: 50},
-      widthScatter = 900 - marginScatter.left - marginScatter.right,
-      heightScatter = 600 - marginScatter.top - marginScatter.bottom;
+    const marginScatter = {top: 10, right: 50, bottom: 30, left: 50},
+      widthScatter = 1200 - marginScatter.left - marginScatter.right,
+      heightScatter = 500 - marginScatter.top - marginScatter.bottom;
 
     const svg = d3.select("#scatterPlot")
       .append("svg")
-        .attr("width", "1000")
+        .attr("width", "1200")
         .attr("height", heightScatter + marginScatter.top + marginScatter.bottom)
       .append("g")
         .attr("transform", `translate(${marginScatter.left},${marginScatter.top})`);
