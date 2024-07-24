@@ -196,8 +196,8 @@
 	<select id="selectButton"></select>
 </div>
 <div id="exploration"> 
-  <svg width=600 height=600 id="svg1"></svg>
-  <svg width=600 height=600 id="svg2"></svg> 
+  <svg width=600 height=400 id="svg1"></svg>
+  <svg width=600 height=400 id="svg2"></svg> 
 </div> 
   
 <script>
@@ -210,9 +210,9 @@
       .append("g")
         .attr("transform", `translate(${marginLine.left},${marginLine.top})`);
 
-  const marginBar = {top: 10, right: 50, bottom: 50, left: 50},
-    widthBar = 600 - marginBar.left - marginBar.right,
-    heightBar = 600 - marginBar.top - marginBar.bottom;
+  const marginBar = {top: 10, right: 50, bottom: 10, left: 50},
+    widthBar = 400 - marginBar.left - marginBar.right,
+    heightBar = 400 - marginBar.top - marginBar.bottom;
 
   const svgBar = d3.select("#svg2")
       .append("g")
