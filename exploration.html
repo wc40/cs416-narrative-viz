@@ -202,16 +202,16 @@
   
 <script>
 
-  const marginLine = {top: 10, right: 50, bottom: 10, left: 50},
-      widthLine = 400 - marginLine.left - marginLine.right,
+  const marginLine = {top: 10, right: 50, bottom: 30, left: 50},
+      widthLine = 600 - marginLine.left - marginLine.right,
       heightLine = 400 - marginLine.top - marginLine.bottom;
 
   const svgLine = d3.select("#svg1")
       .append("g")
         .attr("transform", `translate(${marginLine.left},${marginLine.top})`);
 
-  const marginBar = {top: 10, right: 50, bottom: 10, left: 50},
-    widthBar = 400 - marginBar.left - marginBar.right,
+  const marginBar = {top: 10, right: 50, bottom: 30, left: 50},
+    widthBar = 600 - marginBar.left - marginBar.right,
     heightBar = 400 - marginBar.top - marginBar.bottom;
 
   const svgBar = d3.select("#svg2")
