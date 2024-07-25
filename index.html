@@ -7,343 +7,344 @@
   <button onclick="nextScene(current_scene);">Next</button>
     <script>
       const marginScatter = {top: 30, right: 50, bottom: 30, left: 50},
-        widthScatter = 1200 - marginScatter.left - marginScatter.right,
-        heightScatter = 500 - marginScatter.top - marginScatter.bottom;
-
-      const svg = d3.select("#scatterPlot")
-        .append("svg")
-          .attr("width", "1200")
-          .attr("height", heightScatter + marginScatter.top + marginScatter.bottom)
-        .append("g")
-          .attr("transform", `translate(${marginScatter.left},${marginScatter.top})`);
-          
-      var y_value_1 = 'population', y_value_2 = 'gdp', y_value_3 = 'total_energy';
-      var y_ticks_1 = [100000,300000,1000000,3000000,10000000,30000000,10000000,30000000,100000000,300000000,1000000000],
-          y_ticks_2 = [1000000000,3000000000,10000000000,30000000000,100000000000,300000000000,1000000000000,3000000000000,10000000000000,30000000000000],
-          y_ticks_3 = [1000000000,3000000000,10000000000,30000000000,100000000000,300000000000,1000000000000,3000000000000,10000000000000,30000000000000];
-
-      var current_scene = 1;
-      var current_y_value = y_value_1;
-      var current_y_ticks = y_ticks_1;
-      
-      const nodeSize = d3.scaleLinear([0,73],[1,18]);
-      const color = d3.scaleOrdinal()
-      .domain(['Americas','Europe','Africa','Asia','Oceania'])
-      .range(d3.schemeSet2);
-      const yAxis = svg.append('g').attr('class','myYaxis');
-      
-      
-
-      function updateChart(yAxisValue,yTickValues){
-        d3.csv("https://wc40.github.io/cs416-narrative-viz/data1.csv").then(function(data) {
+          widthScatter = 1200 - marginScatter.left - marginScatter.right,
+          heightScatter = 500 - marginScatter.top - marginScatter.bottom;
+  
+        const svg = d3.select("#scatterPlot")
+          .append("svg")
+            .attr("width", "1200")
+            .attr("height", heightScatter + marginScatter.top + marginScatter.bottom)
+          .append("g")
+            .attr("transform", `translate(${marginScatter.left},${marginScatter.top})`);
+            
+        var y_value_1 = 'population', y_value_2 = 'gdp', y_value_3 = 'total_energy';
+        var y_ticks_1 = [100000,300000,1000000,3000000,10000000,30000000,10000000,30000000,100000000,300000000,1000000000],
+            y_ticks_2 = [1000000000,3000000000,10000000000,30000000000,100000000000,300000000000,1000000000000,3000000000000,10000000000000,30000000000000],
+            y_ticks_3 = [1000000000,3000000000,10000000000,30000000000,100000000000,300000000000,1000000000000,3000000000000,10000000000000,30000000000000];
+  
+        var current_scene = 1;
+        var current_y_value = y_value_1;
+        var current_y_ticks = y_ticks_1;
         
-      const xAxis = d3.scaleLog(d3.extent(data,function(d){return +d['energy_per_capita']}),[0,widthScatter]).base(10);
-      const y = d3.scaleLog().range([heightScatter,0]).base(10);
+        const nodeSize = d3.scaleLinear([0,73],[1,18]);
+        const color = d3.scaleOrdinal()
+        .domain(['Americas','Europe','Africa','Asia','Oceania'])
+        .range(d3.schemeSet2);
+        const yAxis = svg.append('g').attr('class','myYaxis');
+        
+        
+  
+        function updateChart(yAxisValue,yTickValues){
+          d3.csv("https://wc40.github.io/cs416-narrative-viz/data1.csv").then(function(data) {
+          
+        const xAxis = d3.scaleLog(d3.extent(data,function(d){return +d['energy_per_capita']}),[0,widthScatter]).base(10);
+        const y = d3.scaleLog().range([heightScatter,0]).base(10);
+        
+        const tooltip = d3.select("#scatterPlot")
+          .append("div")
+          .style("opacity", 0)
+          .attr("class", "tooltip")
+          .style("color","white")
+          .style("background-color", "black")
+          .style("border", "solid")
+          .style("border-width", "1px")
+          .style("border-radius", "4px")
+          .style("padding", "5px")
+          .style("position",'absolute')
       
-      const tooltip = d3.select("#scatterPlot")
-        .append("div")
-        .style("opacity", 0)
-        .attr("class", "tooltip")
-        .style("color","white")
-        .style("background-color", "black")
-        .style("border", "solid")
-        .style("border-width", "1px")
-        .style("border-radius", "4px")
-        .style("padding", "5px")
-        .style("position",'absolute')
-    
-      // Three function that change the tooltip when user hover / move / leave a cell
-      const mouseover = function(event,d) {
-        tooltip.transition().duration(300).style("opacity", 0.7)
-      }
-      const mousemove = function(event,d) {
-        tooltip
-          .html("Country: \xa0" + d['country'] + '<br>Green Energy:  ' + d['green_energy_share'] + '%')
-          .style("left", (event.x) + "px")
-          .style("top", (event.y) + "px")
-      }
-      const mouseleave = function(d) {
-        tooltip.transition().duration(300).style("opacity", 0)
-      }
-
-      svg.append('g')
-        .attr("transform", `translate(0, ${heightScatter})`)
+        // Three function that change the tooltip when user hover / move / leave a cell
+        const mouseover = function(event,d) {
+          tooltip.transition().duration(300).style("opacity", 0.7)
+        }
+        const mousemove = function(event,d) {
+          tooltip
+            .html("Country: \xa0" + d['country'] + '<br>Region: ' + d['region'] + '<br>Green Energy:  ' + d['green_energy_share'] + '%')
+            .style("left", (event.x) + "px")
+            .style("top", (event.y) + "px")
+        }
+        const mouseleave = function(d) {
+          tooltip.transition().duration(300).style("opacity", 0)
+        }
+  
+        svg.append('g')
+          .attr("transform", `translate(0, ${heightScatter})`)
+          .transition().duration(1000)
+          .call(
+          d3.axisBottom(xAxis)
+          .tickValues([100,300,1000,3000,10000,30000,100000,200000])
+          .tickFormat(d3.format("~s"))
+          );
+          
+        y.domain(d3.extent(data,function(d){return +d[yAxisValue]}),);
+  
+        yAxis
         .transition().duration(1000)
         .call(
-        d3.axisBottom(xAxis)
-        .tickValues([100,300,1000,3000,10000,30000,100000,200000])
-        .tickFormat(d3.format("~s"))
-        );
+          d3.axisLeft(y)
+          .tickValues(yTickValues)
+          .tickFormat(d3.format("~s")));
+  
+        svg
+        .selectAll('circle')
+        .data(data)
+        .join('circle').transition().duration(1000)
+        .attr('cx', function(d) {return xAxis(+d['energy_per_capita']);})
+        .attr('cy', function(d) {return y(+d[yAxisValue]);})
+        .attr('r', function(d) {return 3 + (nodeSize(+d['green_energy_share']) );})
+        .attr('fill',function(d){return color(d.region)})
+        .attr('stroke','black')
         
-      y.domain(d3.extent(data,function(d){return +d[yAxisValue]}),);
-
-      yAxis
-      .transition().duration(1000)
-      .call(
-        d3.axisLeft(y)
-        .tickValues(yTickValues)
-        .tickFormat(d3.format("~s")));
-
-      svg
-      .selectAll('circle')
-      .data(data)
-      .join('circle').transition().duration(1000)
-      .attr('cx', function(d) {return xAxis(+d['energy_per_capita']);})
-      .attr('cy', function(d) {return y(+d[yAxisValue]);})
-      .attr('r', function(d) {return 3 + (nodeSize(+d['green_energy_share']) );})
-      .attr('fill',function(d){return color(d.region)})
-      .attr('stroke','black')
-      
-      svg
-      .selectAll('circle')
-      .on("mouseover", mouseover)
-      .on("mousemove", mousemove)
-      .on("mouseleave", mouseleave);
+        svg
+        .selectAll('circle')
+        .on("mouseover", mouseover)
+        .on("mousemove", mousemove)
+        .on("mouseleave", mouseleave);
+          
+        const annotation1 = [
+        {
+          note: {
+            label: "",
+            title: "Population",
+            wrap: 150
+          },
+          x: 5,
+          y: 0,
+          dy: 0,
+          dx: 0
+        },
+        {
+          note: {
+            label: "",
+            title: "Energy per Capita",
+            wrap: 150
+          },
+          x: 1010,
+          y: 415,
+          dy: 0,
+          dx: 0
+        },
+        {
+          note: {
+            label: "Nodes are colored according to region and sized according to green energy utilization.",
+            title: "Try hovering for more info."
+          },
+          x: 10,
+          y: 300,
+          dy: 0,
+          dx: 0
+        },
+        {
+          note: {
+            label: "Population: 335,942,016",
+            title: "United States"
+          },
+          x: xAxis(73294.336),
+          y: y(335942016),
+          dy: 20,
+          dx: 50
+        },
+        {
+          note: {
+            label: "Population: 5,379,836",
+            title: "Norway"
+          },
+          x: xAxis(103599.203),
+          y: y(5379836),
+          dy: 130,
+          dx: -10
+        },
+        {
+          note: {
+            label: "Population: 208,327,408",
+            title: "Nigeria",
+          },
+          x: xAxis(2445.065),
+          y: y(208327408),
+          dy: -20,
+          dx: -20
+        }
+        ]
+        const annotation2 = [
+        {
+          note: {
+            label: "",
+            title: "GDP",
+            wrap: 150
+          },
+          x: 5,
+          y: 0,
+          dy: 0,
+          dx: 0
+        },
+        {
+          note: {
+            label: "",
+            title: "Energy per Capita",
+            wrap: 150
+          },
+          x: 1010,
+          y: 415,
+          dy: 0,
+          dx: 0
+        },
+        {
+          note: {
+            label: "Countries that use more energy per capita also tend to receive more of their energy from green sources",
+            title: "",
+            wrap: 150
+          },
+          x: 5,
+          y: 100,
+          dy: 0,
+          dx: 0
+        },
+        {
+          note: {
+            label: "GDP: 18 Trillion USD",
+            title: "United States",
+            wrap: 150
+          },
+          x: xAxis(73294.336),
+          y: y(18027400000000),
+          dy: 50,
+          dx: 50
+        },
+        {
+          note: {
+            label: "GDP: 449.5 Billion USD",
+            title: "Norway",
+            wrap: 200
+          },
+          x: xAxis(103599.203),
+          y: y(449485000000),
+          dy: 150,
+          dx: -10
+        },
+        {
+          note: {
+            label: "GDP: 1 Trillion USD",
+            title: "Nigeria",
+            wrap: 150
+          },
+          x: xAxis(2445.065),
+          y: y(1060060000000),
+          dy: 0,
+          dx: -30
+        }
+        ]
+        const annotation3 = [
+        {
+          note: {
+            label: "",
+            title: "Total Energy",
+            wrap: 150
+          },
+          x: 5,
+          y: 0,
+          dy: 0,
+          dx: 0
+        },
+        {
+          note: {
+            label: "",
+            title: "Energy per Capita",
+            wrap: 150
+          },
+          x: 1010,
+          y: 415,
+          dy: 0,
+          dx: 0
+        },
+        {
+          note: {
+            label: "Notice how the circles are moving close to the center",
+            title: "",
+            wrap: 200
+          },
+          x: 5,
+          y: 200,
+          dy: 0,
+          dx: 0
+        },
+        {
+          note: {
+            label: "Total Energy:    24.6 Trillion kWh",
+            title: "United States",
+            wrap: 250
+          },
+          x: xAxis(73294.336),
+          y: y(24622646997221),
+          dy: 10,
+          dx: -60
+        },
+        {
+          note: {
+            label: "Total Energy: 557 Billion kWh",
+            title: "Norway",
+            wrap: 200
+          },
+          x: xAxis(103599.203),
+          y: y(557346721871),
+          dy: 140,
+          dx: -10
+        },
+        {
+          note: {
+            label: "Total Energy: 509 Billion kWh",
+            title: "Nigeria",
+            wrap: 200
+          },
+          x: xAxis(2445.065),
+          y: y(509374053842),
+          dy: -30,
+          dx: -30
+            }
+          ]
+          if (current_scene==1){
+            annotations = annotation1;
+          }
+          else if (current_scene == 2){
+            svg.select(".annotations").remove()
+            annotations = annotation2;
+          }
+          else if (current_scene == 3){
+            svg.select(".annotations").remove()
+            annotations = annotation3;
+          }
+            // Add annotation to the chart
+          const makeAnnotations = d3.annotation()
+            .annotations(annotations);
+          svg.append('g')
+            .call(makeAnnotations)
+            
+            })
+            }
         
-    const annotation1 = [
-      {
-        note: {
-          label: "",
-          title: "Population",
-          wrap: 150
-        },
-        x: 5,
-        y: 0,
-        dy: 0,
-        dx: 0
-      },
-      {
-        note: {
-          label: "",
-          title: "Energy per Capita",
-          wrap: 150
-        },
-        x: 1010,
-        y: 415,
-        dy: 0,
-        dx: 0
-      },
-      {
-        note: {
-          label: "Try hovering over the circles for more information",
-          title: ""
-        },
-        x: 5,
-        y: 20,
-        dy: 0,
-        dx: 0
-      },
-      {
-        note: {
-          label: "Population: 335,942,016",
-          title: "United States"
-        },
-        x: xAxis(73294.336),
-        y: y(335942016),
-        dy: 20,
-        dx: 50
-      },
-      {
-        note: {
-          label: "Population: 5,379,836",
-          title: "Norway"
-        },
-        x: xAxis(103599.203),
-        y: y(5379836),
-        dy: 130,
-        dx: -10
-      },
-      {
-        note: {
-          label: "Population: 208,327,408",
-          title: "Nigeria",
-        },
-        x: xAxis(2445.065),
-        y: y(208327408),
-        dy: -20,
-        dx: -20
-      }
-    ]
-    const annotation2 = [
-      {
-        note: {
-          label: "",
-          title: "GDP",
-          wrap: 150
-        },
-        x: 5,
-        y: 0,
-        dy: 0,
-        dx: 0
-      },
-      {
-        note: {
-          label: "",
-          title: "Energy per Capita",
-          wrap: 150
-        },
-        x: 1010,
-        y: 415,
-        dy: 0,
-        dx: 0
-      },
-      {
-        note: {
-          label: "Countries that use more energy per capita also receive more of their energy from green sources",
-          title: "",
-          wrap: 200
-        },
-        x: 5,
-        y: 20,
-        dy: 0,
-        dx: 0
-      },
-      {
-        note: {
-          label: "GDP: 18 Trillion USD",
-          title: "United States",
-          wrap: 150
-        },
-        x: xAxis(73294.336),
-        y: y(18027400000000),
-        dy: 50,
-        dx: 50
-      },
-      {
-        note: {
-          label: "GDP: 449.5 Billion USD",
-          title: "Norway",
-          wrap: 200
-        },
-        x: xAxis(103599.203),
-        y: y(449485000000),
-        dy: 150,
-        dx: -10
-      },
-      {
-        note: {
-          label: "GDP: 1 Trillion USD",
-          title: "Nigeria",
-          wrap: 150
-        },
-        x: xAxis(2445.065),
-        y: y(1060060000000),
-        dy: 0,
-        dx: -30
-      }
-    ]
-    const annotation3 = [
-      {
-        note: {
-          label: "",
-          title: "Total Energy",
-          wrap: 150
-        },
-        x: 5,
-        y: 0,
-        dy: 0,
-        dx: 0
-      },
-      {
-        note: {
-          label: "",
-          title: "Energy per Capita",
-          wrap: 150
-        },
-        x: 1010,
-        y: 415,
-        dy: 0,
-        dx: 0
-      },
-      {
-        note: {
-          label: "Notice how the circles are moving close to the center",
-          title: "",
-          wrap: 200
-        },
-        x: 5,
-        y: 20,
-        dy: 0,
-        dx: 0
-      },
-      {
-        note: {
-          label: "Total Energy:    24.6 Trillion kWh",
-          title: "United States",
-          wrap: 250
-        },
-        x: xAxis(73294.336),
-        y: y(24622646997221),
-        dy: 10,
-        dx: -20
-      },
-      {
-        note: {
-          label: "Total Energy: 557 Billion kWh",
-          title: "Norway",
-          wrap: 200
-        },
-        x: xAxis(103599.203),
-        y: y(557346721871),
-        dy: 150,
-        dx: -10
-      },
-      {
-        note: {
-          label: "Total Energy: 509 Billion kWh",
-          title: "Nigeria",
-          wrap: 200
-        },
-        x: xAxis(2445.065),
-        y: y(509374053842),
-        dy: -30,
-        dx: -30
-      }
-    ]
-    if (current_scene==1){
-      annotations = annotation1;
-    }
-    else if (current_scene == 2){
-      svg.select(".annotations").remove()
-      annotations = annotation2;
-    }
-    else if (current_scene == 3){
-      svg.select(".annotations").remove()
-      annotations = annotation3;
-    }
-      // Add annotation to the chart
-    const makeAnnotations = d3.annotation()
-      .annotations(annotations);
-    svg.append('g')
-      .call(makeAnnotations)
-      
-      })
-      }
-      
-      
-      function nextScene(curScene){
-        if (curScene == 1 ) {
-          current_scene = 2;
-          current_y_value = y_value_2;
-          current_y_ticks = y_ticks_2;
-          updateChart(current_y_value,current_y_ticks);
+        
+        function nextScene(curScene){
+          if (curScene == 1 ) {
+            current_scene = 2;
+            current_y_value = y_value_2;
+            current_y_ticks = y_ticks_2;
+            updateChart(current_y_value,current_y_ticks);
+          }
+          else if (curScene == 2 ) {
+            current_scene = 3
+            current_y_value = y_value_3;
+            current_y_ticks = y_ticks_3;
+            updateChart(current_y_value,current_y_ticks);
+          }
+          else if (curScene == 3) {
+            window.location.href = "https://wc40.github.io/cs416-narrative-viz/exploration.html";
+          }
         }
-        else if (curScene == 2 ) {
-          current_scene = 3
-          current_y_value = y_value_3;
-          current_y_ticks = y_ticks_3;
-          updateChart(current_y_value,current_y_ticks);
-        }
-        else if (curScene == 3) {
-          window.location.href = "https://wc40.github.io/cs416-narrative-viz/exploration.html";
-        }
-      }
-      
+        
       updateChart(current_y_value,current_y_ticks);
     </script>
     
   <head>
-  <h3>The graph above explores how a country's Energy usage per capita is affected by different variables, such as population, GDP, and total energy used in the country.
+  <h3>Let's explore how a country's energy usage per capita interacts with different variables, such as population, GDP, and total energy used in the country.
   </h3>
 </head>
 </html>
+
