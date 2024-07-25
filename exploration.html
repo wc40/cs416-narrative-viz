@@ -10,15 +10,11 @@
     }
 </style>
 
-<head>
-  <h1>Exploration
-  </h1>
-</head>
 
 <div id="scatterPlot">  </div>
 
   <script>
-    const marginScatter = {top: 10, right: 50, bottom: 30, left: 50},
+    const marginScatter = {top: 30, right: 50, bottom: 30, left: 50},
       widthScatter = 1200 - marginScatter.left - marginScatter.right,
       heightScatter = 500 - marginScatter.top - marginScatter.bottom;
 
@@ -34,11 +30,10 @@
         y_ticks_2 = [1000000000,3000000000,10000000000,30000000000,100000000000,300000000000,1000000000000,3000000000000,10000000000000,30000000000000],
         y_ticks_3 = [1000000000,3000000000,10000000000,30000000000,100000000000,300000000000,1000000000000,3000000000000,10000000000000,30000000000000];
 
-    var current_scene = 1;
     var current_y_value = 'income_per_capita';
-    var current_y_ticks = [200,300,1000,3000,10000,30000,100000];
+    var current_y_ticks = [200,300,1000,3000,10000,30000,60000];
     
-    const nodeSize = d3.scaleLinear([0,100],[1,18]);
+    const nodeSize = d3.scaleLinear([0,73],[1,18]);
     const color = d3.scaleOrdinal()
     .domain(['Americas','Europe','Africa','Asia','Oceania'])
     .range(d3.schemeSet2);
@@ -114,84 +109,91 @@
       
       
 
-    const annotation1 = [
+    const annotations = [
+      {
+        note: {
+          label: "",
+          title: "Income per Capita",
+          wrap: 150
+        },
+        x: 5,
+        y: 0,
+        dy: 0,
+        dx: 0
+      },
+      {
+        note: {
+          label: "",
+          title: "Energy per Capita",
+          wrap: 150
+        },
+        x: 1010,
+        y: 415,
+        dy: 0,
+        dx: 0
+      },
+      {
+        note: {
+          label: "This indicates there may be a correlation between the two values being plotted",
+          title: "Now the circles nearly form a line.",
+          wrap: 240
+        },
+        x: 10,
+        y: 150,
+        dy: 0,
+        dx: 0
+      },
     {
       note: {
-        label: "Population: 335,942,016",
-        title: "United States"
+        label: "Income per Capita: 53,872 USD",
+        title: "United States",
+        wrap: 150
       },
       x: x(73294.336),
-      y: y(335942016),
-      dy: 100,
-      dx: 100
-    }
-  ]
-    const annotation2 = [
+      y: y(53872.1531),
+      dy: 170,
+      dx: -10
+    },
     {
       note: {
-        label: "GDP: 18 trillion USD",
-        title: "United States"
+        label: "Income per Capita: 1,744 USD",
+        title: "Nigeria",
+        wrap: 150
       },
-      x: x(73294.336),
-      y: y(18027400000000),
-      dy: 100,
-      dx: 100
+      x: x(2445.065),
+      y: y(1744.18039),
+      dy: -75,
+      dx: 30,
+    },
+    {
+      note: {
+        label: "Income per Capita: 53,949 USD",
+        title: "Norway",
+        wrap: 150
+      },
+      x: x(103599.203),
+      y: y(53949.8025),
+      dy: 150,
+      dx: 0
     }
   ]
-  if (current_scene==1){
-    annotations = annotation1;
-  }
-  else if (current_scene == 2){
-    svg.select(".annotations").remove()
-    annotations = annotation2;
-  }
     // Add annotation to the chart
     const makeAnnotations = d3.annotation()
       .annotations(annotations);
       svg.append('g')
       .call(makeAnnotations)
       
-      /*svg.selectAll('line').remove();
-      
-      var us = svg.selectAll("us")
-        .data(data.filter(function(d){return d.country == 'United States'}))
-        .enter()
-        .append('g')
-        
-      us.append('line')
-      .attr('x1',function(d) {return x(+d['energy_per_capita']);})
-      .attr('x2', 600)
-      .attr('y1', function(d) {return y(+d[yAxisValue]);})
-      .attr('y2', 100)
-      .attr('stroke','black')
-      .attr('stroke-width',0.5)*/
+
     })
-    }
-    
-    function nextScene(curScene){
-      if (curScene == 1 ) {
-        current_scene = 2;
-        current_y_value = y_value_2;
-        current_y_ticks = y_ticks_2;
-        updateScatter(current_y_value,current_y_ticks);
-      }
-      else if (curScene == 2 ) {
-        //change current_y_value and tick values
-        //update chart
-        current_scene = 3
-        current_y_value = y_value_3;
-        current_y_ticks = y_ticks_3;
-        updateScatter(current_y_value,current_y_ticks);
-      }
-      else if (curScene == 3) {
-        window.location.href = "https://wc40.github.io/cs416-narrative-viz/exploration.html";
-      }
     }
     
     updateScatter(current_y_value,current_y_ticks);
     
   </script>
-
+<head>
+  <h3>Use the drop down menu below to select different countries and see their income/energy usage over time, and the breakdown of their energy sources in 2020.
+  </h3>
+</head>
 <div class="select-container">
 	<select id="selectButton"></select>
 </div>
@@ -254,13 +256,13 @@ Promise.all([
         
     // y-axis
     const yLine = d3.scaleLog()
-      .domain([100,85000])
+      .domain([100,300000])
       .range([heightLine,0])
       .base(10)
     svgLine.append("g")
       .call(
         d3.axisLeft(yLine)
-          .tickValues([100,500,1000,3000,10000,30000,80000])
+          .tickValues([100,500,1000,3000,10000,30000,100000,300000])
         .tickFormat(d3.format("~s"))
           );
 
@@ -269,7 +271,7 @@ Promise.all([
       .range(['darkgreen','green','lawngreen','greenyellow','yellowgreen','yellow','orange','red','darkred']);
 
 
-          // x-axis declaration and plot
+    // x-axis declaration and plot
     var xBar = d3.scaleBand()
       .range([ 0, widthBar ])
       .domain(green_data.map(function(d) { return d.energy_source; }))
@@ -324,6 +326,38 @@ Promise.all([
           .attr("stroke", "red")
           .style("stroke-width", 4)
           .style("fill", "none")
+      
+      //legend for line graph
+      svgLine.append('g')
+        .append('rect')
+        .attr('x', 100)
+        .attr('y', -10)
+        .attr('width', 10)
+        .attr('height', 10)
+        .attr('stroke', 'black')
+        .attr('fill', 'red');
+        
+      svgLine.append('g')
+        .append('rect')
+        .attr('x', 100)
+        .attr('y', 10)
+        .attr('width', 10)
+        .attr('height', 10)
+        .attr('stroke', 'black')
+        .attr('fill', 'green');
+        
+      svgLine.append('g')
+            .append('text')
+            .attr('x', 120)
+            .attr('y', 1)
+            .text("Energy per Capita in kWh");
+            
+      svgLine.append('g')
+            .append('text')
+            .attr('x', 120)
+            .attr('y', 20)
+            .text("Income per Capita in USD");
+
 
     // update chart with new selection
     function updateChart(selectedGroup) {
