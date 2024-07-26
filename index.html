@@ -4,6 +4,7 @@
 <script src="https://rawgit.com/susielu/d3-annotation/master/d3-annotation.min.js"></script>
 
 <div id="scatterPlot">  </div>
+  <button onclick="previousScene(current_scene);">Previous</button>
   <button onclick="nextScene(current_scene);">Next</button>
     <script>
       const marginScatter = {top: 30, right: 50, bottom: 30, left: 50},
@@ -301,6 +302,7 @@
             }
           ]
           if (current_scene==1){
+            svg.select(".annotations").remove()
             annotations = annotation1;
           }
           else if (current_scene == 2){
@@ -336,6 +338,23 @@
           }
           else if (curScene == 3) {
             window.location.href = "https://wc40.github.io/cs416-narrative-viz/exploration.html";
+          }
+        }
+        function previousScene(curScene){
+          if (curScene == 3 ) {
+            current_scene = 2;
+            current_y_value = y_value_2;
+            current_y_ticks = y_ticks_2;
+            updateChart(current_y_value,current_y_ticks);
+          }
+          else if (curScene == 2 ) {
+            current_scene = 1
+            current_y_value = y_value_1;
+            current_y_ticks = y_ticks_1;
+            updateChart(current_y_value,current_y_ticks);
+          }
+          else if (curScene == 1) {
+            //already at beginning
           }
         }
         
