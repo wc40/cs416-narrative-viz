@@ -59,7 +59,6 @@
       .style("padding", "5px")
       .style("position",'absolute')
 
-    // Three function that change the tooltip when user hover / move / leave a cell
     const mouseover = function(event,d) {
       tooltip.transition().duration(300).style("opacity", 0.7)
     }
@@ -134,7 +133,7 @@
       },
       {
         note: {
-          label: "This indicates there may be a correlation between the two values being plotted",
+          label: "This indicates there may be a correlation between income and energy usage per capita",
           title: "Now the circles nearly form a line.",
           wrap: 240
         },
@@ -177,7 +176,7 @@
       dx: 0
     }
   ]
-    // Add annotation to the chart
+
     const makeAnnotations = d3.annotation()
       .annotations(annotations);
       svg.append('g')
@@ -237,7 +236,7 @@ Promise.all([
       //bar chart original options
     const country_options = ["Argentina","Australia","Austria","Belarus","Belgium","Brazil","Bulgaria","Canada","China","Colombia","Croatia","Czechia","Denmark","Ecuador","Estonia","Finland","France","Germany","Greece","Hong Kong","Hungary","India","Indonesia","Ireland","Israel","Italy","Japan","Kazakhstan","South Korea","Latvia","Lithuania","Luxembourg","Malaysia","Mexico","Netherlands","New Zealand","North Macedonia","Norway","Peru","Philippines","Poland","Portugal","Romania","Russia","Slovakia","Slovenia","South Africa","Spain","Sweden","Switzerland","Taiwan","Thailand","Turkey","Ukraine","United Kingdom","United States"]
     
-    //insert options to button
+    //insert options to drop down menu
     d3.select("#selectButton")
       .selectAll('myOptions')
      	.data(country_options)
@@ -246,7 +245,7 @@ Promise.all([
       .text(function (d) { return d; }) // text showed in the menu
       .attr("value", function (d) { return d; }) // corresponding value returned by the button
   
-    // x-axis
+    // Line graph x-axis
     const xLine = d3.scaleTime()
         .domain(d3.extent(income_data, function (d) { return d3.timeParse("%Y")(d.year); }))
         .range([ 0, widthLine ]);
@@ -254,7 +253,7 @@ Promise.all([
         .attr("transform", `translate(0, ${heightLine})`)
         .call(d3.axisBottom(xLine));
         
-    // y-axis
+    // Line graph y-axis
     const yLine = d3.scaleLog()
       .domain([100,300000])
       .range([heightLine,0])
@@ -271,7 +270,7 @@ Promise.all([
       .range(['darkgreen','green','lawngreen','greenyellow','yellowgreen','yellow','orange','red','darkred']);
 
 
-    // x-axis declaration and plot
+    // Bar chart x-axis declaration and plot
     var xBar = d3.scaleBand()
       .range([ 0, widthBar ])
       .domain(green_data.map(function(d) { return d.energy_source; }))
@@ -283,7 +282,7 @@ Promise.all([
         .attr("transform", "translate(-10,0)rotate(-45)")
         .style("text-anchor", "end");
     
-    // y-axis declaration and plot
+    // Bar chart y-axis declaration and plot
     const yBar = d3.scaleLinear()
       .domain([0,100])
       .range([heightBar,0])

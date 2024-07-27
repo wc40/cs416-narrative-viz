@@ -33,7 +33,6 @@
         .range(d3.schemeSet2);
         const yAxis = svg.append('g').attr('class','myYaxis');
         
-        
   
         function updateChart(yAxisValue,yTickValues){
           d3.csv("https://wc40.github.io/cs416-narrative-viz/data1.csv").then(function(data) {
@@ -53,7 +52,6 @@
           .style("padding", "5px")
           .style("position",'absolute')
       
-        // Three function that change the tooltip when user hover / move / leave a cell
         const mouseover = function(event,d) {
           tooltip.transition().duration(300).style("opacity", 0.7)
         }
@@ -313,7 +311,7 @@
             svg.select(".annotations").remove()
             annotations = annotation3;
           }
-            // Add annotation to the chart
+
           const makeAnnotations = d3.annotation()
             .annotations(annotations);
           svg.append('g')
@@ -362,7 +360,7 @@
     </script>
     
   <head>
-  <h3>Let's explore how a country's energy usage per capita interacts with different variables, such as population, GDP, and total energy used in the country.
+  <h3>Explore how a country's energy usage per capita interacts with different variables, such as population, GDP, and total energy used in the country.
   </h3>
 </head>
 </html>
