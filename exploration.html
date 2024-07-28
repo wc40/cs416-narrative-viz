@@ -64,7 +64,7 @@
     }
     const mousemove = function(event,d) {
       tooltip
-        .html("Country: \xa0" + d['country'] + '<br>Green Energy:  ' + d['green_energy_share'] + '%')
+        .html("Country: \xa0" + d['country'] + '<br>Region:  ' + d['region'] + '<br>Green Energy:  ' + d['green_energy_share'] + '%')
         .style("left", (event.x) + "px")
         .style("top", (event.y) + "px")
     }

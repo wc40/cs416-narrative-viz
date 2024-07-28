@@ -86,7 +86,7 @@
         svg
         .selectAll('circle')
         .data(data)
-        .join('circle').transition().duration(1000)
+        .join('circle').transition().duration(1500)
         .attr('cx', function(d) {return xAxis(+d['energy_per_capita']);})
         .attr('cy', function(d) {return y(+d[yAxisValue]);})
         .attr('r', function(d) {return 3 + (nodeSize(+d['green_energy_share']) );})
@@ -256,7 +256,7 @@
         },
         {
           note: {
-            label: "Notice how the circles are moving close towards a trend line",
+            label: "Notice how the circles are moving closer towards a trend line",
             title: "",
             wrap: 200
           },
