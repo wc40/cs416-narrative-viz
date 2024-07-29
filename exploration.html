@@ -203,7 +203,7 @@
   
 <script>
 
-  const marginLine = {top: 10, right: 50, bottom: 30, left: 50},
+  const marginLine = {top: 10, right: 50, bottom: 60, left: 50},
       widthLine = 600 - marginLine.left - marginLine.right,
       heightLine = 400 - marginLine.top - marginLine.bottom;
 
@@ -211,7 +211,7 @@
       .append("g")
         .attr("transform", `translate(${marginLine.left},${marginLine.top})`);
 
-  const marginBar = {top: 10, right: 50, bottom: 30, left: 50},
+  const marginBar = {top: 10, right: 50, bottom: 60, left: 50},
     widthBar = 600 - marginBar.left - marginBar.right,
     heightBar = 400 - marginBar.top - marginBar.bottom;
 
@@ -261,7 +261,7 @@ Promise.all([
     svgLine.append("g")
       .call(
         d3.axisLeft(yLine)
-          .tickValues([100,500,1000,3000,10000,30000,100000,300000])
+          .tickValues([100,300,1000,3000,10000,30000,100000,300000])
         .tickFormat(d3.format("~s"))
           );
 
