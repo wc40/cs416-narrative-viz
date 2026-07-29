@@ -8,11 +8,10 @@
 
   <link rel="stylesheet" href="css/styles.css">
   <script src="https://d3js.org/d3.v7.min.js"></script>
+  <!-- d3-annotation from cdnjs. This used to point at rawgit.com, which shut
+       down in 2019, so none of the annotations were loading. -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-annotation/2.5.1/d3-annotation.min.js"></script>
   <script src="js/common.js"></script>
-  <!-- This page used to pull d3-annotation from rawgit.com, which shut down in
-       2019, so none of the annotations were loading. The country marks are now
-       drawn directly (see drawAnnotations below), which drops the dependency and
-       lets them transition between scenes instead of being rebuilt. -->
 </head>
 
 <body>
@@ -337,74 +336,32 @@ function drawTrend(fit, dataExtent, dur) {
     );
 }
 
-/* Country marks.
-   Drawn by hand rather than with d3-annotation. The library rebuilds its whole
-   layer whenever the data changes, so the marks flickered out and back on every
-   scene change. A keyed join on country name keeps the same three elements
-   alive across scenes, so they glide to their new spots instead.
-
-   The layer is pointer-events: none in CSS, so hovering an annotated country
-   still reaches the dot underneath and opens its tooltip. */
 function drawAnnotations(rows, scene, dur) {
   const byName = new Map(rows.map(d => [d.country, d]));
 
   const notes = scene.marks
-    .map(mark => {
-      const d = byName.get(mark.name);
-      if (!d) return null;
-      const px = x(d.energyPerCap);
-      const py = y(d[scene.key]);
-      return {
-        key: mark.name,
-        px, py,
-        dx: mark.dx,
-        dy: mark.dy,
-        ring: (d.hasGreen ? size(d.greenShare) : NO_DATA_R) + 5,
-        anchor: mark.dx < 0 ? 'end' : 'start',
+    .map(m => ({ mark: m, d: byName.get(m.name) }))
+    .filter(o => o.d)
+    .map(({ mark, d }) => ({
+      note: {
         title: d.country,
         // Compact values here. The tooltip carries full precision.
-        sub: `${fmt.si3(d.energyPerCap)} kWh/person · ${scene.key === 'population' ? '' : '$'}${fmt.si3(d[scene.key])}`
-      };
-    })
-    .filter(Boolean);
+        label: `${fmt.si3(d.energyPerCap)} kWh/person · ${scene.key === 'population' ? '' : '$'}${fmt.si3(d[scene.key])}`,
+        wrap: 190,
+        align: mark.dx < 0 ? 'right' : 'left'
+      },
+      x: x(d.energyPerCap),
+      y: y(d[scene.key]),
+      dx: mark.dx,
+      dy: mark.dy,
+      subject: { radius: (d.hasGreen ? size(d.greenShare) : NO_DATA_R) + 4, radiusPadding: 0 }
+    }));
 
-  const joined = gAnnot.selectAll('g.mark').data(notes, n => n.key);
+  gAnnot.selectAll('*').remove();
+  if (!notes.length) return;
 
-  const entered = joined.enter().append('g').attr('class', 'mark');
-  entered.append('path').attr('class', 'mark-connector');
-  entered.append('circle').attr('class', 'mark-ring');
-  entered.append('text').attr('class', 'mark-title');
-  entered.append('text').attr('class', 'mark-sub');
-
-  const all = entered.merge(joined);
-
-  // Text swaps immediately; only geometry animates.
-  all.select('.mark-title').text(n => n.title);
-  all.select('.mark-sub').text(n => n.sub);
-
-  const move = sel => dur ? sel.transition().duration(dur) : sel;
-
-  move(all.select('.mark-connector')).attr('d', connectorPath);
-  move(all.select('.mark-ring'))
-    .attr('cx', n => n.px).attr('cy', n => n.py).attr('r', n => n.ring);
-  move(all.select('.mark-title'))
-    .attr('x', n => n.px + n.dx).attr('y', n => n.py + n.dy).attr('text-anchor', n => n.anchor);
-  move(all.select('.mark-sub'))
-    .attr('x', n => n.px + n.dx).attr('y', n => n.py + n.dy + 16).attr('text-anchor', n => n.anchor);
-
-  joined.exit().remove();
-}
-
-/** Straight line from just under the label across to the edge of the ring. */
-function connectorPath(n) {
-  const len = Math.hypot(n.dx, n.dy) || 1;
-  const ux = n.dx / len, uy = n.dy / len;
-  const ringX = n.px + ux * n.ring;
-  const ringY = n.py + uy * n.ring;
-  // Start at the label's inner corner so the line never crosses the text.
-  const labelX = n.px + n.dx + (n.anchor === 'end' ? 6 : -6);
-  const labelY = n.py + n.dy + 5;
-  return `M${labelX},${labelY}L${ringX},${ringY}`;
+  gAnnot.call(d3.annotation().type(d3.annotationCalloutCircle).annotations(notes));
+  gAnnot.style('opacity', 0).transition().delay(dur * 0.55).duration(320).style('opacity', 1);
 }
 
 function applyRegionFilter() {

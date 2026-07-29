@@ -6,7 +6,7 @@ I tested three candidate explanations against energy use per capita across 153 c
 
 **[View it here →](https://wc40.github.io/cs416-narrative-viz/)**
 
-Built with D3 v7. No build step, no framework, one CDN script.
+Built with D3 v7 and d3-annotation. No build step and no framework, just two CDN scripts.
 
 ---
 
@@ -105,8 +105,6 @@ python3 -m http.server 8000
 This started as a course project for CS 416 Data Visualization at UIUC. I came back to it later and found a handful of things worth writing down.
 
 **The annotations were never rendering.** `d3-annotation` was loading from `rawgit.com`, which shut down in October 2019. The script silently failed, so every annotation and every axis label was missing at runtime. That's the entire narrative layer of a narrative visualization.
-
-I ended up dropping the library rather than repointing it at a live CDN. It rebuilds its whole layer whenever the data changes, so the country marks flickered out and back on every scene change, and its note backgrounds sat on top of the dots and swallowed the hover events. The marks are now drawn directly in `drawAnnotations()`: a keyed join on country name keeps the same three elements alive across scenes so they glide to their new positions, and the layer is `pointer-events: none` so hovering a labeled country still reaches its dot. That also means one less unmaintained dependency, since d3-annotation hasn't shipped a release since 2018.
 
 **Everything pointed at absolute URLs.** Data and navigation both hardcoded `https://wc40.github.io/...`, so the project couldn't run locally at all and "Next" navigated away from any local copy.
 
