@@ -1,11 +1,11 @@
 /* ==========================================================================
-   common.js — shared scales, formatting, statistics and DOM helpers.
-   Loaded by both index.html (narrative) and exploration.html (free explore).
+   common.js. Shared scales, formatting, statistics, and DOM helpers.
+   Loaded by both index.html (narrative) and exploration.html (exploration).
    ========================================================================== */
 
-/* ---------- Region colour scale -------------------------------------------
-   Okabe–Ito qualitative palette: distinguishable under deuteranopia,
-   protanopia and tritanopia, which the d3.schemeSet2 default is not.
+/* ---------- Region color scale ---------------------------------------------
+   Okabe-Ito qualitative palette. The colors stay distinct for the three common
+   types of color blindness, which D3's default schemeSet2 doesn't.
    -------------------------------------------------------------------------- */
 
 const REGIONS = ['Africa', 'Americas', 'Asia', 'Europe', 'Oceania'];
@@ -71,12 +71,12 @@ const fmt = {
 };
 
 /* ---------- Parsing ---------------------------------------------------------
-   The source CSVs use an empty string for "not reported". Coercing those to 0
-   with `+d.field` (as the original build did) silently turns 89 of 153
-   countries into false zeroes. `num()` preserves the distinction.
+   The CSVs use an empty string for "not reported". Coercing that with +d.field
+   turns 89 of the 153 countries into zeros, which is wrong and invisible on a
+   chart. num() keeps missing and zero separate.
    ---------------------------------------------------------------------------- */
 
-/** Parse a CSV cell to a finite number, or null if blank / "..". */
+/** Parse a CSV cell to a finite number, or null if blank or "..". */
 function num(value) {
   if (value == null) return null;
   const s = String(value).trim();
@@ -85,21 +85,20 @@ function num(value) {
   return Number.isFinite(n) ? n : null;
 }
 
-/** Positive-only variant — log scales cannot render 0 or negatives. */
+/** Positive values only, since log scales can't plot 0 or negatives. */
 function numPos(value) {
   const n = num(value);
   return n != null && n > 0 ? n : null;
 }
 
 /**
- * Load a CSV, stripping a leading UTF-8 byte-order mark.
+ * Load a CSV and strip the leading UTF-8 BOM.
  *
- * All four source files begin with a BOM. `d3.csv` does not remove it, so the
- * FIRST column header parses as "﻿country" and `d.country` comes back
- * undefined. Browsers happen to hide this — the Fetch spec's UTF-8 decode
- * strips the BOM inside response.text() — but that is an accident of the
- * platform, and it breaks immediately under Node, jsdom, bundlers or any
- * non-fetch loader. Stripping it explicitly makes parsing environment-independent.
+ * All four files start with a BOM and d3.csv doesn't remove it, so the first
+ * column header parses as "﻿country" and d.country comes back undefined.
+ * Browsers hide this because fetch strips the BOM inside response.text(), but
+ * that only holds in a browser. It breaks under Node, jsdom, or any loader that
+ * isn't fetch. Stripping it here means the parse works the same everywhere.
  */
 function csvLoad(path, rowFn) {
   return d3.text(path).then(text =>
@@ -132,9 +131,10 @@ function loadCountries(path = 'data/countries-2020.csv') {
 /* ---------- Statistics ------------------------------------------------------ */
 
 /**
- * Ordinary least squares on log10(x) vs log10(y).
- * Returns slope (an elasticity), intercept, Pearson r, R², and n.
- * Only strictly positive pairs are used, which is stated in the README.
+ * OLS fit on log10(x) against log10(y). Returns the slope (an elasticity),
+ * intercept, Pearson r, R², and n. Only positive pairs are used, since the log
+ * of zero is undefined. Every variable here is complete and positive across all
+ * 153 rows, so nothing actually gets dropped.
  */
 function logLogRegression(rows, xKey, yKey) {
   const pts = rows
@@ -163,7 +163,7 @@ function logLogRegression(rows, xKey, yKey) {
   };
 }
 
-/** Plain-English strength label for |r|, using conventional social-science cuts. */
+/** Plain-English strength label for |r|, using the usual social science cutoffs. */
 function strengthLabel(r) {
   const a = Math.abs(r);
   if (a < 0.2) return 'essentially none';
@@ -174,10 +174,9 @@ function strengthLabel(r) {
 }
 
 /* ---------- Tooltip ---------------------------------------------------------
-   One node per page, appended to <body> and positioned in page coordinates
-   (pageX/pageY) so it stays anchored correctly when the window is scrolled.
-   The original build appended a fresh tooltip div on every redraw and used
-   viewport-relative event.x, which leaked nodes and drifted on scroll.
+   One node per page, positioned with pageX/pageY so it stays put when the page
+   is scrolled. The old version appended a new tooltip div on every redraw and
+   used viewport-relative event.x, so divs piled up and the tooltip drifted.
    ---------------------------------------------------------------------------- */
 
 function createTooltip() {
@@ -214,9 +213,9 @@ function createTooltip() {
 /* ---------- Axis / layout helpers ------------------------------------------ */
 
 /**
- * Tick values for a log scale, with density chosen from how many decades the
- * domain covers. A fixed 1–3 pattern is right across four decades but yields a
- * single tick on a domain spanning half a decade, so the mantissas adapt.
+ * Tick values for a log scale. How many ticks per decade depends on how wide
+ * the domain is. A fixed 1-3 pattern works fine across four decades but gives
+ * you one lonely tick on a domain that only spans half a decade.
  */
 function logTicks(domain) {
   const [lo, hi] = domain;

@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Energy &amp; Prosperity — what actually predicts how much energy a person uses?</title>
-  <meta name="description" content="A narrative visualization of energy consumption per capita against population, GDP and income across 153 countries in 2020.">
+  <title>Energy &amp; Prosperity — what predicts how much energy a person uses?</title>
+  <meta name="description" content="A narrative visualization of energy use per capita against population, GDP, and income across 153 countries in 2020.">
 
   <link rel="stylesheet" href="css/styles.css">
   <script src="https://d3js.org/d3.v7.min.js"></script>
-  <!-- d3-annotation via cdnjs. The previous build loaded this from rawgit.com,
-       which was shut down in October 2019, so every annotation silently failed. -->
+  <!-- d3-annotation from cdnjs. This used to point at rawgit.com, which shut
+       down in 2019, so none of the annotations were loading. -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-annotation/2.5.1/d3-annotation.min.js"></script>
   <script src="js/common.js"></script>
 </head>
@@ -18,12 +18,12 @@
 <div class="wrap">
 
   <header class="masthead">
-    <p class="kicker">Global energy &amp; economic development · 153 countries · 2020</p>
-    <h1>What actually predicts how much energy a person uses?</h1>
+    <p class="kicker">Global energy and economic development · 153 countries · 2020</p>
+    <h1>What predicts how much energy a person uses?</h1>
     <p class="standfirst">
-      Energy consumption per person varies more than a thousandfold across the world. Three plausible
-      explanations — how many people a country has, how big its economy is, and how much its people
-      earn — turn out to be wildly unequal in explanatory power.
+      Energy use per person varies by more than a thousand times across countries. I tested three
+      explanations for that spread: how many people a country has, how big its economy is, and how
+      much its people earn. Only one of them holds up.
     </p>
   </header>
 
@@ -39,7 +39,7 @@
 
   <div class="chart-card">
     <p class="chart-title" id="chartTitle"></p>
-    <p class="chart-sub">Both axes are logarithmic. Circle area is proportional to the share of energy from renewable sources.</p>
+    <p class="chart-sub">Both axes are logarithmic. Circle area is proportional to the share of energy that comes from renewables. The same three countries are labeled in every scene so you can track where they move.</p>
     <svg id="scatter" role="img" aria-labelledby="scatterDesc"></svg>
     <desc id="scatterDesc">Scatter plot of energy use per capita against the current scene's variable, one circle per country.</desc>
     <div class="legend-row">
@@ -62,19 +62,19 @@
   <p class="note" id="sceneNote"></p>
 
   <p class="note">
-    <strong>Reading this chart honestly.</strong> These are cross-sectional correlations for a single
-    year, not causal estimates. Rich countries can afford more energy, and abundant energy helps
-    economies grow; this data cannot separate the two directions. Renewable share is reported for only
-    64 of 153 countries, and those 64 skew wealthy — so any pattern involving circle size is drawn
-    from a non-random subset and is shown for context rather than as a finding.
+    <strong>A few caveats.</strong> These are correlations from a single year, not causal estimates.
+    Rich countries can afford more energy, and cheap energy helps economies grow, and this data can't
+    separate the two directions. Renewable share is only reported for 64 of the 153 countries, and
+    those 64 skew wealthy, so anything involving circle size comes from a biased subset. I've left it
+    in for context, not as a result.
   </p>
 
   <footer class="site-footer">
     <p>
-      Data: <a href="https://github.com/owid/energy-data">Our World in Data — Energy</a> (consumption,
-      renewables share) and <a href="https://data.worldbank.org/">World Bank World Development
-      Indicators</a> (population, GDP, adjusted net national income per capita). Reference year 2020.
-      Full method notes in the <a href="https://github.com/wc40/cs416-narrative-viz#readme">README</a>.
+      Data from <a href="https://github.com/owid/energy-data">Our World in Data</a> (energy use,
+      renewable share) and the <a href="https://data.worldbank.org/">World Bank</a> (population, GDP,
+      adjusted net national income per capita). Reference year 2020. Method notes are in the
+      <a href="https://github.com/wc40/cs416-narrative-viz#readme">README</a>.
     </p>
   </footer>
 
@@ -82,94 +82,88 @@
 
 <script>
 /* ==========================================================================
-   Narrative controller — three scenes over one shared scatter plot.
-   The data file is fetched once and reused; each scene swaps the y encoding.
+   Three scenes over one scatter plot. The CSV loads once and each scene
+   swaps out the y encoding.
    ========================================================================== */
+
+/* The same three countries are annotated in every scene, and each one keeps a
+   fixed corner. Only the connector moves, so it's easy to see where a country
+   travels between scenes. Corners also keep the labels off the data. */
+const MARKS = [
+  { name: 'Nigeria',       corner: 'top-left' },
+  { name: 'United States', corner: 'top-right' },
+  { name: 'Iceland',       corner: 'bottom-right' }
+];
 
 const SCENES = [
   {
     id: 'population',
     key: 'population',
     label: 'Scene 1 of 3',
-    title: 'Country size tells you almost nothing',
-    body: 'The obvious first guess is that big countries burn more energy per person. They do not. ' +
-          'Plotting <strong>population</strong> against energy use per person produces a shapeless ' +
-          'cloud: China and India sit near the bottom of the energy axis, while Iceland and Norway — ' +
-          'with fewer people than a mid-sized city — sit at the very top.',
+    title: "Population doesn't explain much",
+    body: 'The first thing I checked was population. If bigger countries used more energy per person, ' +
+          'this would slope upward. It doesn\'t. <strong>China and India sit near the bottom</strong> of ' +
+          'the energy axis, while Iceland and Norway sit at the top with a tiny fraction of the people.',
     yTitle: 'Population',
-    unit: 'people',
-    note: 'Population explains under 2% of the variation in energy use per person. If anything the ' +
-          'relationship leans slightly negative, which is a small-sample artefact rather than a finding.',
-    // Explicit offsets: placement is chosen per country so callouts land in
-    // empty regions of this particular scene rather than on top of each other.
-    // Offsets always point toward the plot interior so callouts never clip the frame.
-    marks: [
-      { name: 'Nigeria',       dx: -104, dy: 82 },
-      { name: 'United States', dx: -128, dy: 96 },
-      { name: 'Iceland',       dx: -138, dy: -66 }
-    ]
+    note: 'Population accounts for less than 2% of the variation in energy use per person. The slight ' +
+          'downward tilt isn\'t meaningful at this sample size.'
   },
   {
     id: 'gdp',
     key: 'gdp',
     label: 'Scene 2 of 3',
-    title: 'Economic size does a little better — but only a little',
-    body: 'Swap the y-axis to <strong>total GDP</strong> and a faint upward tilt appears. It is real ' +
-          'but weak, and for the same reason as before: total GDP measures how big an economy is, not ' +
-          'how prosperous its people are. A large poor country and a small rich one land in the same ' +
-          'place vertically while sitting at opposite ends horizontally.',
+    title: 'Total GDP does a little better',
+    body: 'Switching the y-axis to <strong>total GDP</strong> produces a weak upward trend. The problem ' +
+          'is that total GDP measures how big an economy is, not how well off the people in it are. A ' +
+          'large poor country and a small rich one land in the same place vertically while sitting at ' +
+          'opposite ends horizontally.',
     yTitle: 'GDP (constant 2015 US$)',
-    unit: 'US$',
-    note: 'Both of the first two measures share a flaw: they are <em>totals</em>. Total quantities ' +
-          'scale with headcount, which is precisely the thing the x-axis has already divided out.',
-    marks: [
-      { name: 'Nigeria',       dx: -96,  dy: -62 },
-      { name: 'United States', dx: -134, dy: 92 }
-    ]
+    note: 'Population and total GDP fail for the same reason. Both are totals, and totals scale with ' +
+          'headcount, which is exactly what the x-axis already divides out.'
   },
   {
     id: 'income',
     key: 'incomePerCap',
     label: 'Scene 3 of 3',
-    title: 'Compare per person, and the cloud becomes a line',
-    body: 'Measure prosperity the same way we measured energy — <strong>per person</strong> — and the ' +
-          'scatter collapses onto a straight line across four orders of magnitude. Income per capita ' +
-          'alone accounts for roughly four-fifths of the variation in how much energy an average ' +
-          'person consumes.',
+    title: 'Income per person lines it up',
+    body: 'Measuring prosperity the same way I measured energy, <strong>per person</strong>, pulls the ' +
+          'scatter onto a line that holds across four orders of magnitude. Income per capita on its own ' +
+          'accounts for about 80% of the variation in how much energy the average person uses.',
     yTitle: 'Income per capita (constant 2015 US$)',
-    unit: 'US$',
-    note: 'The slope on log–log axes is an elasticity: a 10% higher income per capita is associated ' +
-          'with about 8% more energy consumed per person. The relationship is slightly sub-linear, ' +
-          'meaning richer countries do get somewhat more economic output per unit of energy.',
-    marks: [
-      { name: 'Nigeria',       dx: -88,  dy: -68 },
-      { name: 'United States', dx: -126, dy: 104 }
-    ]
+    note: 'On log-log axes the slope is an elasticity. A 10% higher income per capita comes with about ' +
+          '8% more energy used per person. It sits just under 1, so richer countries do get somewhat ' +
+          'more output per unit of energy.'
   }
 ];
 
-/* ---------- Chart geometry (fixed user-space; SVG scales via viewBox) ------ */
+/* ---------- Chart geometry (fixed user space, scaled by viewBox) ----------- */
 
-const M = { top: 26, right: 58, bottom: 56, left: 82 };
+const M = { top: 40, right: 58, bottom: 56, left: 82 };
 const W = 1120, H = 560;
 const iw = W - M.left - M.right;
 const ih = H - M.top - M.bottom;
+
+/* Where each corner label sits, in inner-plot coordinates. */
+const CORNERS = {
+  'top-left':     { x: 2,      y: 16,      align: 'left'  },
+  'top-right':    { x: iw - 2, y: 16,      align: 'right' },
+  'bottom-right': { x: iw - 2, y: ih - 40, align: 'right' }
+};
 
 const svg = d3.select('#scatter')
   .attr('viewBox', `0 0 ${W} ${H}`)
   .attr('preserveAspectRatio', 'xMidYMid meet');
 
-const root      = svg.append('g').attr('transform', `translate(${M.left},${M.top})`);
-const gGridY    = root.append('g').attr('class', 'grid');
-const gGridX    = root.append('g').attr('class', 'grid');
-const gTrend    = root.append('g');
-const gDots     = root.append('g');
-const gXAxis    = root.append('g').attr('class', 'axis').attr('transform', `translate(0,${ih})`);
-const gYAxis    = root.append('g').attr('class', 'axis');
-const gAnnot    = root.append('g').attr('class', 'annotation-layer');
-const gLabels   = root.append('g');
+const root    = svg.append('g').attr('transform', `translate(${M.left},${M.top})`);
+const gGridY  = root.append('g').attr('class', 'grid');
+const gGridX  = root.append('g').attr('class', 'grid');
+const gTrend  = root.append('g');
+const gDots   = root.append('g');
+const gXAxis  = root.append('g').attr('class', 'axis').attr('transform', `translate(0,${ih})`);
+const gYAxis  = root.append('g').attr('class', 'axis');
+const gAnnot  = root.append('g').attr('class', 'annotation-layer');
+const gLabels = root.append('g');
 
-// Axis titles (static x, dynamic y)
 gLabels.append('text')
   .attr('class', 'axis-title')
   .attr('x', iw).attr('y', ih + 46)
@@ -184,7 +178,7 @@ const yTitleEl = gLabels.append('text')
 
 const x = d3.scaleLog().range([0, iw]);
 const y = d3.scaleLog().range([ih, 0]);
-const size = d3.scaleSqrt().domain([0, 100]).range([4, 17]); // area-proportional
+const size = d3.scaleSqrt().domain([0, 100]).range([4, 17]); // area, not radius
 const NO_DATA_R = 4;
 
 const tooltip = createTooltip();
@@ -199,8 +193,8 @@ loadCountries()
   .then(rows => {
     DATA = rows.filter(d => d.energyPerCap != null);
 
-    // No .nice() on log scales — it rounds out to whole decades, which here
-    // pushed the axis to 1M against a maximum of ~186k and left half the plot empty.
+    // No .nice() on a log scale. It rounds out to whole decades, which pushed
+    // the axis to 1M against a max of about 186k and left half the plot empty.
     x.domain(padLogDomain(d3.extent(DATA, d => d.energyPerCap), 1.3));
 
     buildProgress();
@@ -215,7 +209,7 @@ loadCountries()
   })
   .catch(err => {
     console.error(err);
-    d3.select('#chartTitle').text('Could not load data/countries-2020.csv — serve this page over HTTP rather than opening the file directly.');
+    d3.select('#chartTitle').text('Could not load data/countries-2020.csv. Serve this over HTTP instead of opening the file directly.');
   });
 
 /* ---------- Rendering ------------------------------------------------------ */
@@ -237,7 +231,7 @@ function render(i, { animate = true } = {}) {
   drawAxes(dur);
   drawDots(valid, scene, dur);
   drawTrend(fit, d3.extent(valid, d => d.energyPerCap), dur);
-  drawAnnotations(valid, scene, fit, dur);
+  drawAnnotations(valid, scene, dur);
   updateProgress(i);
 
   d3.select('#prevBtn').property('disabled', i === 0);
@@ -288,7 +282,6 @@ function drawDots(rows, scene, dur) {
 function onDotEnter(event, d) {
   d3.select(this).classed('is-hit', true).raise();
   const scene = SCENES[sceneIndex];
-  const val = d[scene.key];
   const green = d.hasGreen
     ? `<div class="tt-row"><span class="tt-key">Renewables</span><span class="tt-val">${fmt.pct(d.greenShare)}</span></div>`
     : `<div class="tt-row"><span class="tt-muted">Renewables not reported</span></div>`;
@@ -297,12 +290,12 @@ function onDotEnter(event, d) {
     <div class="tt-name">${d.country}</div>
     <div class="tt-row"><span class="tt-key">Region</span><span class="tt-val">${d.region}</span></div>
     <div class="tt-row"><span class="tt-key">Energy / person</span><span class="tt-val">${fmt.int(Math.round(d.energyPerCap))} kWh</span></div>
-    <div class="tt-row"><span class="tt-key">${scene.yTitle.split(' (')[0]}</span><span class="tt-val">${formatValue(val, scene)}</span></div>
+    <div class="tt-row"><span class="tt-key">${scene.yTitle.split(' (')[0]}</span><span class="tt-val">${formatValue(d[scene.key], scene)}</span></div>
     ${green}
   `);
 }
 
-function onDotLeave(event) {
+function onDotLeave() {
   d3.select(this).classed('is-hit', false);
   tooltip.hide();
 }
@@ -315,8 +308,8 @@ function formatValue(v, scene) {
 }
 
 function drawTrend(fit, dataExtent, dur) {
-  // Span only the observed range of x. Drawing the fit across the padded axis
-  // domain would extrapolate past the data, which the chart should not imply.
+  // Only span the observed range of x. Drawing the fit across the padded axis
+  // domain would extrapolate past the data.
   const [x0, x1] = dataExtent;
   const pts = d3.range(0, 41).map(i => {
     const xv = Math.pow(10, Math.log10(x0) + (i / 40) * (Math.log10(x1) - Math.log10(x0)));
@@ -325,44 +318,48 @@ function drawTrend(fit, dataExtent, dur) {
 
   const line = d3.line().x(d => x(d[0])).y(d => y(d[1]));
 
-  const path = gTrend.selectAll('path.trend-line').data(pts.length > 1 ? [pts] : []);
-  path.join(
-    enter => enter.append('path').attr('class', 'trend-line').attr('d', line).style('opacity', 0)
-      .call(s => s.transition().duration(dur).style('opacity', 0.65)),
-    update => update.transition().duration(dur).attr('d', line).style('opacity', 0.65),
-    exit => exit.remove()
-  );
+  gTrend.selectAll('path.trend-line')
+    .data(pts.length > 1 ? [pts] : [])
+    .join(
+      enter => enter.append('path').attr('class', 'trend-line').attr('d', line).style('opacity', 0)
+        .call(s => s.transition().duration(dur).style('opacity', 0.65)),
+      update => update.transition().duration(dur).attr('d', line).style('opacity', 0.65),
+      exit => exit.remove()
+    );
 }
 
-function drawAnnotations(rows, scene, fit, dur) {
+function drawAnnotations(rows, scene, dur) {
   const byName = new Map(rows.map(d => [d.country, d]));
 
-  const notes = scene.marks
+  const notes = MARKS
     .map(m => ({ mark: m, d: byName.get(m.name) }))
     .filter(o => o.d)
-    .map(({ mark, d }) => ({
-      note: {
-        // Compact values here; the tooltip carries the full precision.
-        title: d.country,
-        label: `${fmt.si3(d.energyPerCap)} kWh/person · ${scene.key === 'population' ? '' : '$'}${fmt.si3(d[scene.key])}`,
-        wrap: 175,
-        align: mark.dx < 0 ? 'right' : 'left'
-      },
-      x: x(d.energyPerCap),
-      y: y(d[scene.key]),
-      dx: mark.dx,
-      dy: mark.dy,
-      subject: { radius: (d.hasGreen ? size(d.greenShare) : NO_DATA_R) + 4, radiusPadding: 0 }
-    }));
+    .map(({ mark, d }) => {
+      const px = x(d.energyPerCap);
+      const py = y(d[scene.key]);
+      const c = CORNERS[mark.corner];
+      return {
+        note: {
+          title: d.country,
+          // Compact values here. The tooltip carries full precision.
+          label: `${fmt.si3(d.energyPerCap)} kWh/person · ${scene.key === 'population' ? '' : '$'}${fmt.si3(d[scene.key])}`,
+          wrap: 190,
+          align: c.align
+        },
+        x: px,
+        y: py,
+        // Pin the note to its corner by offsetting from the moving point.
+        dx: c.x - px,
+        dy: c.y - py,
+        connector: { type: 'line' },
+        subject: { radius: (d.hasGreen ? size(d.greenShare) : NO_DATA_R) + 4, radiusPadding: 0 }
+      };
+    });
 
   gAnnot.selectAll('*').remove();
   if (!notes.length) return;
 
-  const maker = d3.annotation()
-    .type(d3.annotationCalloutCircle)
-    .annotations(notes);
-
-  gAnnot.call(maker);
+  gAnnot.call(d3.annotation().type(d3.annotationCalloutCircle).annotations(notes));
   gAnnot.style('opacity', 0).transition().delay(dur * 0.55).duration(320).style('opacity', 1);
 }
 
@@ -372,7 +369,7 @@ function applyRegionFilter() {
     .classed('is-dim', d => !all && !activeRegions.has(d.region));
 }
 
-/* ---------- Narration + stat readout --------------------------------------- */
+/* ---------- Narration and stat readout ------------------------------------- */
 
 function swapNarration(scene, fit, animate) {
   const els = ['#sceneLabel', '#sceneTitle', '#sceneBody', '#sceneNote'].map(s => d3.select(s));
@@ -391,12 +388,14 @@ function swapNarration(scene, fit, animate) {
 
 function renderStats(fit, scene) {
   const elasticity = (Math.pow(1.10, fit.slope) - 1) * 100;
+  const yLabel = scene.key === 'population' ? 'population' : scene.yTitle.split(' (')[0].toLowerCase();
+
   const items = [
     { label: 'Countries plotted', value: fit.n, note: 'with data on both axes' },
     { label: 'R²', value: fit.r2.toFixed(3), note: `${(fit.r2 * 100).toFixed(0)}% of variation explained` },
     { label: 'Correlation r', value: fit.r.toFixed(2), note: strengthLabel(fit.r) },
-    { label: 'Log–log slope', value: fit.slope.toFixed(2),
-      note: `+10% energy ↔ ${elasticity >= 0 ? '+' : ''}${elasticity.toFixed(1)}% ${scene.key === 'population' ? 'population' : scene.yTitle.split(' (')[0].toLowerCase()}` }
+    { label: 'Log-log slope', value: fit.slope.toFixed(2),
+      note: `+10% energy ↔ ${elasticity >= 0 ? '+' : ''}${elasticity.toFixed(1)}% ${yLabel}` }
   ];
 
   d3.select('#stats').selectAll('div.stat')
@@ -485,5 +484,6 @@ function wireControls() {
   });
 }
 </script>
+
 </body>
 </html>

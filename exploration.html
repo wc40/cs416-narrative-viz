@@ -18,9 +18,10 @@
     <p class="kicker">Free exploration · 55 countries · 2010–2020</p>
     <h1>Explore a single country</h1>
     <p class="standfirst">
-      The narrative showed that income per capita and energy per capita track each other closely across
-      countries. Here you can check whether they also track each other <em>over time</em> within one
-      country — and see where that country's energy actually comes from.
+      The narrative compares countries against each other in one year. This page does the opposite. It
+      follows one country across eleven years and shows where its energy actually comes from. Pick a
+      country and see whether income and energy move together over time the way they do across the
+      2020 cross-section.
     </p>
   </header>
 
@@ -39,7 +40,7 @@
 
     <div class="chart-card">
       <p class="chart-title" id="lineTitle">Income and energy per capita, 2010–2020</p>
-      <p class="chart-sub">Logarithmic y-axis. Two different units on one scale — read the shape of each line, not the gap between them.</p>
+      <p class="chart-sub">Log y-axis. The two series use different units, so compare the shape of each line rather than the gap between them.</p>
       <svg id="lineChart" role="img" aria-label="Line chart of income and energy per capita over time"></svg>
       <div class="legend-row">
         <div class="legend-group">
@@ -51,7 +52,7 @@
 
     <div class="chart-card">
       <p class="chart-title" id="barTitle">Primary energy mix, 2020</p>
-      <p class="chart-sub">Share of total <em>primary energy consumption</em> by source — not electricity alone, so transport fuel and heating are included. Ordered from lowest to highest carbon intensity.</p>
+      <p class="chart-sub">Share of total <em>primary energy consumption</em> by source. This is not electricity alone, so transport fuel and heating are in here too. Sources run from lowest to highest carbon intensity.</p>
       <svg id="barChart" role="img" aria-label="Bar chart of primary energy consumption share by source"></svg>
       <div class="legend-row">
         <div class="legend-group">
@@ -67,19 +68,19 @@
   <p class="note" id="explNote"></p>
 
   <p class="note">
-    <strong>Two caveats on the left-hand chart.</strong> The two series share a log axis but not a unit,
-    so their vertical separation is meaningless — only the slopes are comparable. And a country whose
-    lines move together over eleven years has not thereby demonstrated causation; both series respond to
-    the business cycle, and 2020 in particular is distorted by the pandemic's demand shock.
+    <strong>Two things to keep in mind on the left chart.</strong> The two lines share an axis but not a
+    unit, so the vertical gap between them doesn't mean anything. Only the slopes are comparable. And
+    eleven years of two series moving together doesn't establish cause either way. Both respond to the
+    business cycle, and 2020 is distorted by the pandemic demand shock.
   </p>
 
   <footer class="site-footer">
     <p>
-      Data: <a href="https://github.com/owid/energy-data">Our World in Data — Energy</a> and
-      <a href="https://data.worldbank.org/">World Bank WDI</a>. Our World in Data publishes a full
-      source breakdown for 56 countries; Hong Kong is excluded here because the World Bank does not
-      report an adjusted net national income series for it, leaving 55.
-      Method notes in the <a href="https://github.com/wc40/cs416-narrative-viz#readme">README</a>.
+      Data from <a href="https://github.com/owid/energy-data">Our World in Data</a> and the
+      <a href="https://data.worldbank.org/">World Bank</a>. Our World in Data publishes a full source
+      breakdown for 56 countries. Hong Kong drops out because the World Bank doesn't report an adjusted
+      net national income series for it, which leaves 55. Method notes are in the
+      <a href="https://github.com/wc40/cs416-narrative-viz#readme">README</a>.
     </p>
   </footer>
 
@@ -87,8 +88,8 @@
 
 <script>
 /* ==========================================================================
-   Country explorer — a time-series panel and a generation-mix panel driven
-   by one shared <select>. All three CSVs are fetched once at boot.
+   Country explorer. A time-series panel and an energy-mix panel, both driven by
+   one shared <select>. All three CSVs load once at boot.
    ========================================================================== */
 
 const SOURCE_ORDER = ['Solar', 'Wind', 'Hydro', 'Other Renew', 'Biofuel', 'Nuclear', 'Gas', 'Oil', 'Coal'];
@@ -166,7 +167,7 @@ Promise.all([
   MIX = mix;
 
   // Only offer countries that have a full generation-mix breakdown AND appear
-  // in both time series — otherwise a selection can render an empty panel.
+  // in both time series. Otherwise a selection can render an empty panel.
   const mixCountries = MIX.columns.filter(c => c !== 'energy_source');
   COUNTRIES = mixCountries
     .filter(c => income.columns.includes(c) && energy.columns.includes(c))
@@ -188,7 +189,7 @@ Promise.all([
   update(initial, false);
 }).catch(err => {
   console.error(err);
-  d3.select('#explNote').text('Could not load the data files — serve this page over HTTP rather than opening it directly from disk.');
+  d3.select('#explNote').text('Could not load the data files. Serve this over HTTP instead of opening it directly from disk.');
 });
 
 /** Extract a clean [{date, value}] series for one country column. */
@@ -236,8 +237,8 @@ function update(country, animate = true) {
 
 function drawLines(inc, eng, dur, country) {
   const all = [...inc, ...eng].map(d => d.value);
-  // No .nice() — on a log scale it snaps out to whole decades, which turned a
-  // 50k–110k range into a 10k–1M axis and flattened both lines into the middle.
+  // No .nice() here. On a log scale it snaps out to whole decades, which turned
+  // a 50k-110k range into a 10k-1M axis and flattened both lines into the middle.
   yLog.domain(padLogDomain(d3.extent(all), 1.3));
 
   lYAxis.transition().duration(dur)
@@ -354,11 +355,11 @@ function renderStats(inc, eng, mix, country) {
     ? 'moved in the same direction'
     : 'moved in opposite directions';
   d3.select('#explNote').html(
-    `<strong>${country}.</strong> Between ${inc[0]?.year ?? ''} and ${inc.at(-1)?.year ?? ''}, income and energy per capita ` +
-    `${dir} — income ${gInc >= 0 ? 'up' : 'down'} ${Math.abs(gInc).toFixed(0)}%, energy ` +
-    `${gEng >= 0 ? 'up' : 'down'} ${Math.abs(gEng).toFixed(0)}%. Many high-income countries show ` +
-    `rising income alongside flat or falling energy use, which is the decoupling the cross-sectional ` +
-    `slope of 0.84 hints at but cannot demonstrate on its own.`
+    `<strong>${country}.</strong> Income and energy per capita ${dir} between ` +
+    `${inc[0]?.year ?? ''} and ${inc.at(-1)?.year ?? ''}. Income ${gInc >= 0 ? 'up' : 'down'} ` +
+    `${Math.abs(gInc).toFixed(0)}%, energy ${gEng >= 0 ? 'up' : 'down'} ${Math.abs(gEng).toFixed(0)}%. ` +
+    `A lot of high-income countries show income rising while energy use stays flat or falls. That's the ` +
+    `decoupling the 0.84 slope in the cross-section hints at but can't prove on its own.`
   );
 }
 </script>

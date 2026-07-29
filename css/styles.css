@@ -12,7 +12,8 @@
   --paper:      #ffffff;
   --paper-2:    #f7f8fa;
 
-  /* Region palette — Okabe–Ito, chosen for colour-vision deficiency safety */
+  /* Region palette. Okabe-Ito, picked so the colors stay distinct for
+     colorblind viewers. D3's default schemeSet2 does not. */
   --c-africa:   #d55e00;
   --c-americas: #0072b2;
   --c-asia:     #cc79a7;
