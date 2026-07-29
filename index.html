@@ -1,366 +1,489 @@
 <!DOCTYPE html>
-<html>
-<script src='https://d3js.org/d3.v6.min.js'></script>
-<script src="https://rawgit.com/susielu/d3-annotation/master/d3-annotation.min.js"></script>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Energy &amp; Prosperity — what actually predicts how much energy a person uses?</title>
+  <meta name="description" content="A narrative visualization of energy consumption per capita against population, GDP and income across 153 countries in 2020.">
 
-<div id="scatterPlot">  </div>
-  <button onclick="previousScene(current_scene);">Previous</button>
-  <button onclick="nextScene(current_scene);">Next</button>
-    <script>
-      const marginScatter = {top: 30, right: 50, bottom: 30, left: 50},
-          widthScatter = 1200 - marginScatter.left - marginScatter.right,
-          heightScatter = 500 - marginScatter.top - marginScatter.bottom;
-  
-        const svg = d3.select("#scatterPlot")
-          .append("svg")
-            .attr("width", "1200")
-            .attr("height", heightScatter + marginScatter.top + marginScatter.bottom)
-          .append("g")
-            .attr("transform", `translate(${marginScatter.left},${marginScatter.top})`);
-            
-        var y_value_1 = 'population', y_value_2 = 'gdp', y_value_3 = 'total_energy';
-        var y_ticks_1 = [100000,300000,1000000,3000000,10000000,30000000,10000000,30000000,100000000,300000000,1000000000],
-            y_ticks_2 = [1000000000,3000000000,10000000000,30000000000,100000000000,300000000000,1000000000000,3000000000000,10000000000000,30000000000000],
-            y_ticks_3 = [1000000000,3000000000,10000000000,30000000000,100000000000,300000000000,1000000000000,3000000000000,10000000000000,30000000000000];
-  
-        var current_scene = 1;
-        var current_y_value = y_value_1;
-        var current_y_ticks = y_ticks_1;
-        
-        const nodeSize = d3.scaleLinear([0,73],[1,18]);
-        const color = d3.scaleOrdinal()
-        .domain(['Americas','Europe','Africa','Asia','Oceania'])
-        .range(d3.schemeSet2);
-        const yAxis = svg.append('g').attr('class','myYaxis');
-        
-  
-        function updateChart(yAxisValue,yTickValues){
-          d3.csv("https://wc40.github.io/cs416-narrative-viz/data1.csv").then(function(data) {
-          
-        const xAxis = d3.scaleLog(d3.extent(data,function(d){return +d['energy_per_capita']}),[0,widthScatter]).base(10);
-        const y = d3.scaleLog().range([heightScatter,0]).base(10);
-        
-        const tooltip = d3.select("#scatterPlot")
-          .append("div")
-          .style("opacity", 0)
-          .attr("class", "tooltip")
-          .style("color","white")
-          .style("background-color", "black")
-          .style("border", "solid")
-          .style("border-width", "1px")
-          .style("border-radius", "4px")
-          .style("padding", "5px")
-          .style("position",'absolute')
-      
-        const mouseover = function(event,d) {
-          tooltip.transition().duration(300).style("opacity", 0.7)
-        }
-        const mousemove = function(event,d) {
-          tooltip
-            .html("Country: \xa0" + d['country'] + '<br>Region: ' + d['region'] + '<br>Green Energy:  ' + d['green_energy_share'] + '%')
-            .style("left", (event.x) + "px")
-            .style("top", (event.y) + "px")
-        }
-        const mouseleave = function(d) {
-          tooltip.transition().duration(300).style("opacity", 0)
-        }
-  
-        svg.append('g')
-          .attr("transform", `translate(0, ${heightScatter})`)
-          .transition().duration(1000)
-          .call(
-          d3.axisBottom(xAxis)
-          .tickValues([100,300,1000,3000,10000,30000,100000,200000])
-          .tickFormat(d3.format("~s"))
-          );
-          
-        y.domain(d3.extent(data,function(d){return +d[yAxisValue]}),);
-  
-        yAxis
-        .transition().duration(1000)
-        .call(
-          d3.axisLeft(y)
-          .tickValues(yTickValues)
-          .tickFormat(d3.format("~s")));
-  
-        svg
-        .selectAll('circle')
-        .data(data)
-        .join('circle').transition().duration(1500)
-        .attr('cx', function(d) {return xAxis(+d['energy_per_capita']);})
-        .attr('cy', function(d) {return y(+d[yAxisValue]);})
-        .attr('r', function(d) {return 3 + (nodeSize(+d['green_energy_share']) );})
-        .attr('fill',function(d){return color(d.region)})
-        .attr('stroke','black')
-        
-        svg
-        .selectAll('circle')
-        .on("mouseover", mouseover)
-        .on("mousemove", mousemove)
-        .on("mouseleave", mouseleave);
-          
-        const annotation1 = [
-        {
-          note: {
-            label: "",
-            title: "Population",
-            wrap: 150
-          },
-          x: 5,
-          y: 0,
-          dy: 0,
-          dx: 0
-        },
-        {
-          note: {
-            label: "",
-            title: "Energy per Capita",
-            wrap: 150
-          },
-          x: 1010,
-          y: 415,
-          dy: 0,
-          dx: 0
-        },
-        {
-          note: {
-            label: "Nodes are colored according to region and sized according to green energy utilization.",
-            title: "Try hovering for more info."
-          },
-          x: 10,
-          y: 300,
-          dy: 0,
-          dx: 0
-        },
-        {
-          note: {
-            label: "Population: 335,942,016",
-            title: "United States"
-          },
-          x: xAxis(73294.336),
-          y: y(335942016),
-          dy: 20,
-          dx: 50
-        },
-        {
-          note: {
-            label: "Population: 5,379,836",
-            title: "Norway"
-          },
-          x: xAxis(103599.203),
-          y: y(5379836),
-          dy: 130,
-          dx: -10
-        },
-        {
-          note: {
-            label: "Population: 208,327,408",
-            title: "Nigeria",
-          },
-          x: xAxis(2445.065),
-          y: y(208327408),
-          dy: -20,
-          dx: -20
-        }
-        ]
-        const annotation2 = [
-        {
-          note: {
-            label: "",
-            title: "GDP",
-            wrap: 150
-          },
-          x: 5,
-          y: 0,
-          dy: 0,
-          dx: 0
-        },
-        {
-          note: {
-            label: "",
-            title: "Energy per Capita",
-            wrap: 150
-          },
-          x: 1010,
-          y: 415,
-          dy: 0,
-          dx: 0
-        },
-        {
-          note: {
-            label: "Countries that use more energy per capita also tend to receive more of their energy from green sources",
-            title: "",
-            wrap: 150
-          },
-          x: 5,
-          y: 100,
-          dy: 0,
-          dx: 0
-        },
-        {
-          note: {
-            label: "GDP: 18 Trillion USD",
-            title: "United States",
-            wrap: 150
-          },
-          x: xAxis(73294.336),
-          y: y(18027400000000),
-          dy: 50,
-          dx: 50
-        },
-        {
-          note: {
-            label: "GDP: 449.5 Billion USD",
-            title: "Norway",
-            wrap: 200
-          },
-          x: xAxis(103599.203),
-          y: y(449485000000),
-          dy: 150,
-          dx: -10
-        },
-        {
-          note: {
-            label: "GDP: 1 Trillion USD",
-            title: "Nigeria",
-            wrap: 150
-          },
-          x: xAxis(2445.065),
-          y: y(1060060000000),
-          dy: 0,
-          dx: -30
-        }
-        ]
-        const annotation3 = [
-        {
-          note: {
-            label: "",
-            title: "Total Energy",
-            wrap: 150
-          },
-          x: 5,
-          y: 0,
-          dy: 0,
-          dx: 0
-        },
-        {
-          note: {
-            label: "",
-            title: "Energy per Capita",
-            wrap: 150
-          },
-          x: 1010,
-          y: 415,
-          dy: 0,
-          dx: 0
-        },
-        {
-          note: {
-            label: "Notice how the circles are moving closer towards a trend line",
-            title: "",
-            wrap: 200
-          },
-          x: 5,
-          y: 200,
-          dy: 0,
-          dx: 0
-        },
-        {
-          note: {
-            label: "Total Energy:    24.6 Trillion kWh",
-            title: "United States",
-            wrap: 250
-          },
-          x: xAxis(73294.336),
-          y: y(24622646997221),
-          dy: 10,
-          dx: -60
-        },
-        {
-          note: {
-            label: "Total Energy: 557 Billion kWh",
-            title: "Norway",
-            wrap: 200
-          },
-          x: xAxis(103599.203),
-          y: y(557346721871),
-          dy: 140,
-          dx: -10
-        },
-        {
-          note: {
-            label: "Total Energy: 509 Billion kWh",
-            title: "Nigeria",
-            wrap: 200
-          },
-          x: xAxis(2445.065),
-          y: y(509374053842),
-          dy: -30,
-          dx: -30
-            }
-          ]
-          if (current_scene==1){
-            svg.select(".annotations").remove()
-            annotations = annotation1;
-          }
-          else if (current_scene == 2){
-            svg.select(".annotations").remove()
-            annotations = annotation2;
-          }
-          else if (current_scene == 3){
-            svg.select(".annotations").remove()
-            annotations = annotation3;
-          }
-
-          const makeAnnotations = d3.annotation()
-            .annotations(annotations);
-          svg.append('g')
-            .call(makeAnnotations)
-            
-            })
-            }
-        
-        
-        function nextScene(curScene){
-          if (curScene == 1 ) {
-            current_scene = 2;
-            current_y_value = y_value_2;
-            current_y_ticks = y_ticks_2;
-            updateChart(current_y_value,current_y_ticks);
-          }
-          else if (curScene == 2 ) {
-            current_scene = 3
-            current_y_value = y_value_3;
-            current_y_ticks = y_ticks_3;
-            updateChart(current_y_value,current_y_ticks);
-          }
-          else if (curScene == 3) {
-            window.location.href = "https://wc40.github.io/cs416-narrative-viz/exploration.html";
-          }
-        }
-        function previousScene(curScene){
-          if (curScene == 3 ) {
-            current_scene = 2;
-            current_y_value = y_value_2;
-            current_y_ticks = y_ticks_2;
-            updateChart(current_y_value,current_y_ticks);
-          }
-          else if (curScene == 2 ) {
-            current_scene = 1
-            current_y_value = y_value_1;
-            current_y_ticks = y_ticks_1;
-            updateChart(current_y_value,current_y_ticks);
-          }
-          else if (curScene == 1) {
-            //already at beginning
-          }
-        }
-        
-      updateChart(current_y_value,current_y_ticks);
-    </script>
-    
-  <head>
-  <h3>Explore how a country's energy usage per capita interacts with different variables, such as population, GDP, and total energy used in the country.
-  </h3>
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <!-- d3-annotation via cdnjs. The previous build loaded this from rawgit.com,
+       which was shut down in October 2019, so every annotation silently failed. -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-annotation/2.5.1/d3-annotation.min.js"></script>
+  <script src="js/common.js"></script>
 </head>
+
+<body>
+<div class="wrap">
+
+  <header class="masthead">
+    <p class="kicker">Global energy &amp; economic development · 153 countries · 2020</p>
+    <h1>What actually predicts how much energy a person uses?</h1>
+    <p class="standfirst">
+      Energy consumption per person varies more than a thousandfold across the world. Three plausible
+      explanations — how many people a country has, how big its economy is, and how much its people
+      earn — turn out to be wildly unequal in explanatory power.
+    </p>
+  </header>
+
+  <section class="scene-head">
+    <div>
+      <p class="scene-label fade-swap" id="sceneLabel"></p>
+      <h2 class="scene-title fade-swap" id="sceneTitle"></h2>
+      <p class="scene-body fade-swap" id="sceneBody"></p>
+    </div>
+  </section>
+
+  <div class="stats" id="stats" aria-live="polite"></div>
+
+  <div class="chart-card">
+    <p class="chart-title" id="chartTitle"></p>
+    <p class="chart-sub">Both axes are logarithmic. Circle area is proportional to the share of energy from renewable sources.</p>
+    <svg id="scatter" role="img" aria-labelledby="scatterDesc"></svg>
+    <desc id="scatterDesc">Scatter plot of energy use per capita against the current scene's variable, one circle per country.</desc>
+    <div class="legend-row">
+      <div id="regionLegend"></div>
+      <div class="legend-group">
+        <span class="legend-caption">Renewable share</span>
+        <span class="size-key" id="sizeLegend"></span>
+      </div>
+    </div>
+  </div>
+
+  <nav class="controls" aria-label="Scene navigation">
+    <button class="btn" id="prevBtn" type="button">← Previous</button>
+    <button class="btn btn-primary" id="nextBtn" type="button">Next →</button>
+    <div class="progress" id="progress" role="tablist" aria-label="Jump to scene"></div>
+    <span class="spacer"></span>
+    <span class="hint">Use <kbd>←</kbd> <kbd>→</kbd> to move between scenes</span>
+  </nav>
+
+  <p class="note" id="sceneNote"></p>
+
+  <p class="note">
+    <strong>Reading this chart honestly.</strong> These are cross-sectional correlations for a single
+    year, not causal estimates. Rich countries can afford more energy, and abundant energy helps
+    economies grow; this data cannot separate the two directions. Renewable share is reported for only
+    64 of 153 countries, and those 64 skew wealthy — so any pattern involving circle size is drawn
+    from a non-random subset and is shown for context rather than as a finding.
+  </p>
+
+  <footer class="site-footer">
+    <p>
+      Data: <a href="https://github.com/owid/energy-data">Our World in Data — Energy</a> (consumption,
+      renewables share) and <a href="https://data.worldbank.org/">World Bank World Development
+      Indicators</a> (population, GDP, adjusted net national income per capita). Reference year 2020.
+      Full method notes in the <a href="https://github.com/wc40/cs416-narrative-viz#readme">README</a>.
+    </p>
+  </footer>
+
+</div>
+
+<script>
+/* ==========================================================================
+   Narrative controller — three scenes over one shared scatter plot.
+   The data file is fetched once and reused; each scene swaps the y encoding.
+   ========================================================================== */
+
+const SCENES = [
+  {
+    id: 'population',
+    key: 'population',
+    label: 'Scene 1 of 3',
+    title: 'Country size tells you almost nothing',
+    body: 'The obvious first guess is that big countries burn more energy per person. They do not. ' +
+          'Plotting <strong>population</strong> against energy use per person produces a shapeless ' +
+          'cloud: China and India sit near the bottom of the energy axis, while Iceland and Norway — ' +
+          'with fewer people than a mid-sized city — sit at the very top.',
+    yTitle: 'Population',
+    unit: 'people',
+    note: 'Population explains under 2% of the variation in energy use per person. If anything the ' +
+          'relationship leans slightly negative, which is a small-sample artefact rather than a finding.',
+    // Explicit offsets: placement is chosen per country so callouts land in
+    // empty regions of this particular scene rather than on top of each other.
+    // Offsets always point toward the plot interior so callouts never clip the frame.
+    marks: [
+      { name: 'Nigeria',       dx: -104, dy: 82 },
+      { name: 'United States', dx: -128, dy: 96 },
+      { name: 'Iceland',       dx: -138, dy: -66 }
+    ]
+  },
+  {
+    id: 'gdp',
+    key: 'gdp',
+    label: 'Scene 2 of 3',
+    title: 'Economic size does a little better — but only a little',
+    body: 'Swap the y-axis to <strong>total GDP</strong> and a faint upward tilt appears. It is real ' +
+          'but weak, and for the same reason as before: total GDP measures how big an economy is, not ' +
+          'how prosperous its people are. A large poor country and a small rich one land in the same ' +
+          'place vertically while sitting at opposite ends horizontally.',
+    yTitle: 'GDP (constant 2015 US$)',
+    unit: 'US$',
+    note: 'Both of the first two measures share a flaw: they are <em>totals</em>. Total quantities ' +
+          'scale with headcount, which is precisely the thing the x-axis has already divided out.',
+    marks: [
+      { name: 'Nigeria',       dx: -96,  dy: -62 },
+      { name: 'United States', dx: -134, dy: 92 }
+    ]
+  },
+  {
+    id: 'income',
+    key: 'incomePerCap',
+    label: 'Scene 3 of 3',
+    title: 'Compare per person, and the cloud becomes a line',
+    body: 'Measure prosperity the same way we measured energy — <strong>per person</strong> — and the ' +
+          'scatter collapses onto a straight line across four orders of magnitude. Income per capita ' +
+          'alone accounts for roughly four-fifths of the variation in how much energy an average ' +
+          'person consumes.',
+    yTitle: 'Income per capita (constant 2015 US$)',
+    unit: 'US$',
+    note: 'The slope on log–log axes is an elasticity: a 10% higher income per capita is associated ' +
+          'with about 8% more energy consumed per person. The relationship is slightly sub-linear, ' +
+          'meaning richer countries do get somewhat more economic output per unit of energy.',
+    marks: [
+      { name: 'Nigeria',       dx: -88,  dy: -68 },
+      { name: 'United States', dx: -126, dy: 104 }
+    ]
+  }
+];
+
+/* ---------- Chart geometry (fixed user-space; SVG scales via viewBox) ------ */
+
+const M = { top: 26, right: 58, bottom: 56, left: 82 };
+const W = 1120, H = 560;
+const iw = W - M.left - M.right;
+const ih = H - M.top - M.bottom;
+
+const svg = d3.select('#scatter')
+  .attr('viewBox', `0 0 ${W} ${H}`)
+  .attr('preserveAspectRatio', 'xMidYMid meet');
+
+const root      = svg.append('g').attr('transform', `translate(${M.left},${M.top})`);
+const gGridY    = root.append('g').attr('class', 'grid');
+const gGridX    = root.append('g').attr('class', 'grid');
+const gTrend    = root.append('g');
+const gDots     = root.append('g');
+const gXAxis    = root.append('g').attr('class', 'axis').attr('transform', `translate(0,${ih})`);
+const gYAxis    = root.append('g').attr('class', 'axis');
+const gAnnot    = root.append('g').attr('class', 'annotation-layer');
+const gLabels   = root.append('g');
+
+// Axis titles (static x, dynamic y)
+gLabels.append('text')
+  .attr('class', 'axis-title')
+  .attr('x', iw).attr('y', ih + 46)
+  .attr('text-anchor', 'end')
+  .text('Energy use per capita (kWh per person, per year) →');
+
+const yTitleEl = gLabels.append('text')
+  .attr('class', 'axis-title')
+  .attr('transform', 'rotate(-90)')
+  .attr('x', 0).attr('y', -64)
+  .attr('text-anchor', 'end');
+
+const x = d3.scaleLog().range([0, iw]);
+const y = d3.scaleLog().range([ih, 0]);
+const size = d3.scaleSqrt().domain([0, 100]).range([4, 17]); // area-proportional
+const NO_DATA_R = 4;
+
+const tooltip = createTooltip();
+
+let DATA = [];
+let sceneIndex = 0;
+let activeRegions = new Set(REGIONS);
+
+/* ---------- Boot ----------------------------------------------------------- */
+
+loadCountries()
+  .then(rows => {
+    DATA = rows.filter(d => d.energyPerCap != null);
+
+    // No .nice() on log scales — it rounds out to whole decades, which here
+    // pushed the axis to 1M against a maximum of ~186k and left half the plot empty.
+    x.domain(padLogDomain(d3.extent(DATA, d => d.energyPerCap), 1.3));
+
+    buildProgress();
+    buildSizeLegend();
+    renderRegionLegend('#regionLegend', {
+      onToggle: set => { activeRegions = set; applyRegionFilter(); }
+    });
+
+    sceneIndex = sceneFromHash();
+    render(sceneIndex, { animate: false });
+    wireControls();
+  })
+  .catch(err => {
+    console.error(err);
+    d3.select('#chartTitle').text('Could not load data/countries-2020.csv — serve this page over HTTP rather than opening the file directly.');
+  });
+
+/* ---------- Rendering ------------------------------------------------------ */
+
+function render(i, { animate = true } = {}) {
+  const scene = SCENES[i];
+  const dur = animate ? 900 : 0;
+
+  const valid = DATA.filter(d => d[scene.key] != null && d[scene.key] > 0);
+  y.domain(padLogDomain(d3.extent(valid, d => d[scene.key]), 1.5));
+
+  const fit = logLogRegression(valid, 'energyPerCap', scene.key);
+
+  swapNarration(scene, fit, animate);
+  yTitleEl.text(scene.yTitle + ' →');
+  d3.select('#chartTitle')
+    .text(`${scene.yTitle} vs. energy use per capita, ${valid.length} countries, 2020`);
+
+  drawAxes(dur);
+  drawDots(valid, scene, dur);
+  drawTrend(fit, d3.extent(valid, d => d.energyPerCap), dur);
+  drawAnnotations(valid, scene, fit, dur);
+  updateProgress(i);
+
+  d3.select('#prevBtn').property('disabled', i === 0);
+  d3.select('#nextBtn').text(i === SCENES.length - 1 ? 'Explore the data yourself →' : 'Next →');
+}
+
+function drawAxes(dur) {
+  gXAxis.transition().duration(dur).call(
+    d3.axisBottom(x).tickValues(logTicks(x.domain())).tickFormat(fmt.axis).tickSizeOuter(0)
+  );
+  gYAxis.transition().duration(dur).call(
+    d3.axisLeft(y).tickValues(logTicks(y.domain())).tickFormat(fmt.axis).tickSizeOuter(0)
+  );
+  gGridY.transition().duration(dur).call(
+    d3.axisLeft(y).tickValues(logTicks(y.domain())).tickSize(-iw).tickFormat('')
+  );
+  gGridX.attr('transform', `translate(0,${ih})`).transition().duration(dur).call(
+    d3.axisBottom(x).tickValues(logTicks(x.domain())).tickSize(-ih).tickFormat('')
+  );
+}
+
+function drawDots(rows, scene, dur) {
+  gDots.selectAll('circle')
+    .data(rows, d => d.country)
+    .join(
+      enter => enter.append('circle')
+        .attr('class', d => 'dot' + (d.hasGreen ? '' : ' is-nodata'))
+        .attr('cx', d => x(d.energyPerCap))
+        .attr('cy', d => y(d[scene.key]))
+        .attr('r', 0)
+        .attr('fill', d => d.hasGreen ? colorRegion(d.region) : NO_DATA_COLOR)
+        .attr('fill-opacity', d => d.hasGreen ? 0.82 : 0.5),
+      update => update,
+      exit => exit.transition().duration(dur / 2).attr('r', 0).remove()
+    )
+    .on('mouseenter', onDotEnter)
+    .on('mousemove', (event) => tooltip.move(event))
+    .on('mouseleave', onDotLeave)
+    .transition().duration(dur)
+      .attr('cx', d => x(d.energyPerCap))
+      .attr('cy', d => y(d[scene.key]))
+      .attr('r', d => d.hasGreen ? size(d.greenShare) : NO_DATA_R)
+      .attr('fill', d => d.hasGreen ? colorRegion(d.region) : NO_DATA_COLOR);
+
+  applyRegionFilter();
+}
+
+function onDotEnter(event, d) {
+  d3.select(this).classed('is-hit', true).raise();
+  const scene = SCENES[sceneIndex];
+  const val = d[scene.key];
+  const green = d.hasGreen
+    ? `<div class="tt-row"><span class="tt-key">Renewables</span><span class="tt-val">${fmt.pct(d.greenShare)}</span></div>`
+    : `<div class="tt-row"><span class="tt-muted">Renewables not reported</span></div>`;
+
+  tooltip.show(event, `
+    <div class="tt-name">${d.country}</div>
+    <div class="tt-row"><span class="tt-key">Region</span><span class="tt-val">${d.region}</span></div>
+    <div class="tt-row"><span class="tt-key">Energy / person</span><span class="tt-val">${fmt.int(Math.round(d.energyPerCap))} kWh</span></div>
+    <div class="tt-row"><span class="tt-key">${scene.yTitle.split(' (')[0]}</span><span class="tt-val">${formatValue(val, scene)}</span></div>
+    ${green}
+  `);
+}
+
+function onDotLeave(event) {
+  d3.select(this).classed('is-hit', false);
+  tooltip.hide();
+}
+
+function formatValue(v, scene) {
+  if (v == null) return '—';
+  if (scene.key === 'population') return fmt.int(Math.round(v));
+  if (scene.key === 'gdp') return '$' + fmt.magnitude(v, '');
+  return fmt.usd(v);
+}
+
+function drawTrend(fit, dataExtent, dur) {
+  // Span only the observed range of x. Drawing the fit across the padded axis
+  // domain would extrapolate past the data, which the chart should not imply.
+  const [x0, x1] = dataExtent;
+  const pts = d3.range(0, 41).map(i => {
+    const xv = Math.pow(10, Math.log10(x0) + (i / 40) * (Math.log10(x1) - Math.log10(x0)));
+    return [xv, fit.predict(xv)];
+  }).filter(([, yv]) => yv >= y.domain()[0] && yv <= y.domain()[1]);
+
+  const line = d3.line().x(d => x(d[0])).y(d => y(d[1]));
+
+  const path = gTrend.selectAll('path.trend-line').data(pts.length > 1 ? [pts] : []);
+  path.join(
+    enter => enter.append('path').attr('class', 'trend-line').attr('d', line).style('opacity', 0)
+      .call(s => s.transition().duration(dur).style('opacity', 0.65)),
+    update => update.transition().duration(dur).attr('d', line).style('opacity', 0.65),
+    exit => exit.remove()
+  );
+}
+
+function drawAnnotations(rows, scene, fit, dur) {
+  const byName = new Map(rows.map(d => [d.country, d]));
+
+  const notes = scene.marks
+    .map(m => ({ mark: m, d: byName.get(m.name) }))
+    .filter(o => o.d)
+    .map(({ mark, d }) => ({
+      note: {
+        // Compact values here; the tooltip carries the full precision.
+        title: d.country,
+        label: `${fmt.si3(d.energyPerCap)} kWh/person · ${scene.key === 'population' ? '' : '$'}${fmt.si3(d[scene.key])}`,
+        wrap: 175,
+        align: mark.dx < 0 ? 'right' : 'left'
+      },
+      x: x(d.energyPerCap),
+      y: y(d[scene.key]),
+      dx: mark.dx,
+      dy: mark.dy,
+      subject: { radius: (d.hasGreen ? size(d.greenShare) : NO_DATA_R) + 4, radiusPadding: 0 }
+    }));
+
+  gAnnot.selectAll('*').remove();
+  if (!notes.length) return;
+
+  const maker = d3.annotation()
+    .type(d3.annotationCalloutCircle)
+    .annotations(notes);
+
+  gAnnot.call(maker);
+  gAnnot.style('opacity', 0).transition().delay(dur * 0.55).duration(320).style('opacity', 1);
+}
+
+function applyRegionFilter() {
+  const all = activeRegions.size === REGIONS.length;
+  gDots.selectAll('circle')
+    .classed('is-dim', d => !all && !activeRegions.has(d.region));
+}
+
+/* ---------- Narration + stat readout --------------------------------------- */
+
+function swapNarration(scene, fit, animate) {
+  const els = ['#sceneLabel', '#sceneTitle', '#sceneBody', '#sceneNote'].map(s => d3.select(s));
+  const write = () => {
+    d3.select('#sceneLabel').text(scene.label);
+    d3.select('#sceneTitle').text(scene.title);
+    d3.select('#sceneBody').html(scene.body);
+    d3.select('#sceneNote').html('<strong>Note.</strong> ' + scene.note);
+    renderStats(fit, scene);
+  };
+
+  if (!animate) { write(); return; }
+  els.forEach(e => e.classed('is-out', true));
+  setTimeout(() => { write(); els.forEach(e => e.classed('is-out', false)); }, 240);
+}
+
+function renderStats(fit, scene) {
+  const elasticity = (Math.pow(1.10, fit.slope) - 1) * 100;
+  const items = [
+    { label: 'Countries plotted', value: fit.n, note: 'with data on both axes' },
+    { label: 'R²', value: fit.r2.toFixed(3), note: `${(fit.r2 * 100).toFixed(0)}% of variation explained` },
+    { label: 'Correlation r', value: fit.r.toFixed(2), note: strengthLabel(fit.r) },
+    { label: 'Log–log slope', value: fit.slope.toFixed(2),
+      note: `+10% energy ↔ ${elasticity >= 0 ? '+' : ''}${elasticity.toFixed(1)}% ${scene.key === 'population' ? 'population' : scene.yTitle.split(' (')[0].toLowerCase()}` }
+  ];
+
+  d3.select('#stats').selectAll('div.stat')
+    .data(items)
+    .join('div')
+      .attr('class', 'stat')
+      .html(d => `
+        <span class="stat-label">${d.label}</span>
+        <span class="stat-value">${d.value}</span>
+        <span class="stat-note">${d.note}</span>
+      `);
+}
+
+/* ---------- Legends -------------------------------------------------------- */
+
+function buildSizeLegend() {
+  const vals = [5, 25, 60];
+  const svgL = d3.select('#sizeLegend').append('svg')
+    .attr('width', 168).attr('height', 42)
+    .style('width', '168px').style('height', '42px');
+
+  let cx = 16;
+  vals.forEach(v => {
+    const r = size(v);
+    svgL.append('circle')
+      .attr('cx', cx).attr('cy', 22).attr('r', r)
+      .attr('fill', '#9aa3ad').attr('fill-opacity', 0.55)
+      .attr('stroke', '#fff');
+    svgL.append('text')
+      .attr('x', cx).attr('y', 41)
+      .attr('text-anchor', 'middle')
+      .attr('font-size', 10).attr('fill', '#6b7280')
+      .text(v + '%');
+    cx += r + 42;
+  });
+}
+
+/* ---------- Navigation ----------------------------------------------------- */
+
+function buildProgress() {
+  d3.select('#progress').selectAll('button')
+    .data(SCENES)
+    .join('button')
+      .attr('class', 'progress-dot')
+      .attr('type', 'button')
+      .attr('role', 'tab')
+      .attr('aria-label', (d, i) => `Scene ${i + 1}: ${d.title}`)
+      .on('click', (event, d) => goTo(SCENES.indexOf(d)));
+}
+
+function updateProgress(i) {
+  d3.select('#progress').selectAll('button')
+    .classed('is-active', (d, j) => j === i)
+    .attr('aria-selected', (d, j) => String(j === i));
+}
+
+function goTo(i) {
+  if (i < 0 || i >= SCENES.length || i === sceneIndex) return;
+  sceneIndex = i;
+  history.replaceState(null, '', '#' + SCENES[i].id);
+  render(i);
+}
+
+function sceneFromHash() {
+  const id = location.hash.replace('#', '');
+  const i = SCENES.findIndex(s => s.id === id);
+  return i >= 0 ? i : 0;
+}
+
+function wireControls() {
+  d3.select('#prevBtn').on('click', () => goTo(sceneIndex - 1));
+  d3.select('#nextBtn').on('click', () => {
+    if (sceneIndex === SCENES.length - 1) location.href = 'exploration.html';
+    else goTo(sceneIndex + 1);
+  });
+
+  d3.select(window).on('keydown', event => {
+    if (event.target.matches('input, select, textarea')) return;
+    if (event.key === 'ArrowRight') { event.preventDefault(); goTo(sceneIndex + 1); }
+    if (event.key === 'ArrowLeft')  { event.preventDefault(); goTo(sceneIndex - 1); }
+  });
+
+  window.addEventListener('hashchange', () => {
+    const i = sceneFromHash();
+    if (i !== sceneIndex) { sceneIndex = i; render(i); }
+  });
+}
+</script>
+</body>
 </html>
